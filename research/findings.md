@@ -1552,3 +1552,21 @@ sampling. The defensible novelty is aligning the *support distribution* of a pai
 image–fractional-occupancy risk with exact acquisition opportunity. No claim of first balanced,
 patient, axial, hierarchical or hard sampling is permitted. Six static contracts and four numerical
 tests pass locally; CUDA smoke and the one locked30k run remain pending.
+
+## 2026-08-24: one-method paper framing and evidence audit
+
+The paper identity is now locked to one complete method, **SliceAlign-MPD**, corresponding exactly to `code/train_sliceeq_occ_oaac_strong_mpd.py`. Paired through-plane image/occupancy construction, fractional supervision, ordered appearance perturbation, and moment-constrained profile design are internal stages of one training objective. They must not be presented as several proposed methods. PARS and later candidates are excluded from the paper.
+
+No local training process or resumable experiment artifact was found. The next unbiased evidence remains the frozen MM-WHS MRI evaluation, followed by the compute-matched causal ablation. PROMISE12 is closed to further tuning: `0.854573` is retained only as a test-informed development observation, while the MPD validation-selected report is `0.848952`. The current paper draft leaves the primary result cells blank rather than laundering the development checkpoint into a test claim.
+
+The experiment structure was derived from the local BCP/FLDR papers and verified CVPR papers: matched main comparisons, a second dataset, cumulative compute-matched ablation, mechanism analysis, parameter/design audit, patient-level statistics, efficiency, and optional independent seeds. A three-seed replication protocol (`1337/2024/3407`) is prospectively recorded but remains optional, unscheduled, and subordinate to MM-WHS and ablation.
+
+The manuscript project was subsequently converted from a generic two-column article to the official CVPR 2026 Author Kit. The project is self-contained in review mode and includes the official style/BibTeX files, `preamble.tex`, `sec/`, `fig/`, and `main.bib`; this formatting change does not alter the method or evidence boundary.
+
+## 2026-08-24: CVPR narrative refinement
+
+The manuscript now exposes only two coupled scientific decisions: (1) a slice-profile observation must transform the image and its fractional occupancy target together, and (2) the profile sampling law should be designed under robust moment constraints rather than chosen heuristically. EMA training, fixed appearance perturbations, batch construction, and post-processing remain reproducibility details rather than named contributions.
+
+The main ablation is reduced from a seven-row implementation ladder to four compute-matched rows. A0 is the 36-view teacher--student control, A1 changes only the through-plane image, A2 pairs the same profile with a fractional target under the uniform parent law, and A3 adds the moment-constrained distribution. The three adjacent contrasts directly test observation mismatch, paired-target alignment, and distribution design. Hard-target and support sensitivity are supplementary controls.
+
+All implementation filenames, development checkpoint narratives, and internal candidate names were removed from the rendered manuscript. The method figure was relabeled accordingly and now represents MPD through the profile law `w ~ q*` rather than as a detachable block.

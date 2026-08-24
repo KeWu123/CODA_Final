@@ -1,0 +1,16 @@
+\section{Introduction}
+
+Dense annotation is a major bottleneck for medical image segmentation, motivating teacher--student semi-supervised learning that combines a small labeled set with a larger unlabeled set~\cite{tarvainen2017mean,bai2023bcp}. A common recipe generates a pseudo-target from a weakly perturbed image and supervises a strongly perturbed student view~\cite{yang2023unimatch,zhao2023augseg}. Its validity depends on an often implicit condition: the perturbation may change appearance, but it must preserve the semantic target.
+
+That condition becomes fragile for multi-slice MRI. A 2D acquisition has finite through-plane support, and the observed slice can contain signals contributed by adjacent anatomical planes. Slice profiles are therefore used as through-plane degradation models in MRI reconstruction and resolution analysis~\cite{han2021sliceprofile}; partial-volume simulation likewise shows that resolution changes alter the tissue mixture represented by a voxel~\cite{billot2020pvsynthseg}. Simply mixing neighboring images while retaining the center-slice binary mask creates a mismatched training pair: the observation changes while its target does not.
+
+We address this problem with \method. Instead of viewing adjacent-slice mixing as ordinary label-invariant augmentation, \method defines a paired observation operator: one slice profile transforms both the image stack and its occupancy stack. For labeled data, the occupancy is derived from one-hot ground truth; for unlabeled data, it is derived from the exponential-moving-average (EMA) teacher's neighboring pseudo-masks. The resulting soft target records the operator-induced tissue fraction rather than collapsing it back to the center-slice class.
+
+The remaining question is which profiles should be sampled. Uniform sampling gives equal probability to all profiles in a bounded family even though their useful fractional signal varies across patients and along the normalized axial axis. \method therefore designs one global sampling distribution before training. Its robust objective improves the worst patient--axial stratum, while moment, image-residual, density, entropy, and phase-symmetry constraints keep the design close to the parent acquisition budget. The design reads only labeled training stacks and never accesses validation scores, test labels, model confidence, or training loss.
+
+Our contributions are threefold:
+\begin{itemize}
+    \item We formulate through-plane MRI perturbation as a paired observation process and derive acquisition-aligned fractional supervision for both labeled and unlabeled volumes.
+    \item We introduce a moment-constrained profile distribution that improves the worst patient--axial-stratum training signal while preserving the parent observation family's perturbation budget and diversity.
+    \item We preserve the original 2D inference path and evaluate the resulting framework across prostate and cardiac MRI with matched controls, patient-level statistics, and mechanism-focused analysis.
+\end{itemize}

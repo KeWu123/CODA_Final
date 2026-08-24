@@ -246,3 +246,9 @@
 ## Important process note
 
 The autoresearch skill requested a recurring 20-minute continuation job. The current tool environment has neither `/loop` nor cron support, so no recurring job was registered.
+| 238 | 2026-08-24 | autoresearch-resume-audit | Read research-state, findings and log; found no active local training process or locally resumable result. H7.20 and MM-WHS remain pending, with no new numerical evidence. |
+| 239 | 2026-08-24 | paper-method-lock | Locked the paper to one complete method, SliceAlign-MPD, exactly corresponding to train_sliceeq_occ_oaac_strong_mpd.py. Paired occupancy, ordered appearance and MPD are internal stages; PARS and later candidates are excluded. |
+| 240 | 2026-08-24 | paper-draft | Added a self-contained Overleaf-ready draft with Introduction, Related Work, full equations, PROMISE12/MM-WHS tables, compute-matched ablation, mechanism/statistics plan and explicit evidence firewall. |
+| 241 | 2026-08-24 | optional-replication-preregistration | Registered an optional final three-seed replication (1337/2024/3407), validation-only checkpoint selection and no seed selection. It is not scheduled and has lower priority than frozen MM-WHS and causal ablation. |
+| 242 | 2026-08-24 | cvpr-template-conversion | Converted the manuscript into a self-contained official CVPR 2026 review project with cvpr.sty, ieeenat_fullname.bst, preamble.tex, sec/, fig/ and main.bib. Static asset/input/citation audit passed; no method or result claim changed. |
+| 243 | 2026-08-24 | cvpr-narrative-refinement | Reframed the manuscript around one method and two coupled scientific decisions. Removed implementation filenames and development-checkpoint discussion from rendered text, reduced the main ablation to four compute-matched rows, and relabeled the method figure so appearance augmentation is fixed infrastructure and MPD is the profile law rather than a detachable module. |

@@ -1,0 +1,10 @@
+\section{Related Work}
+
+\paragraph{Semi-supervised segmentation.}
+Mean Teacher stabilizes consistency targets through an EMA of model weights~\cite{tarvainen2017mean}. BCP transfers labeled and unlabeled semantics through bidirectional copy--paste in a Mean Teacher framework~\cite{bai2023bcp}. UniMatch and AugSeg show that carefully designed weak-to-strong perturbations can be competitive without increasingly complex networks~\cite{yang2023unimatch,zhao2023augseg}. Recent medical methods continue to explore interpolation and differentiated training~\cite{hu2025betafft}, or annotation ambiguity~\cite{kumari2025ambissl}. These approaches motivate strong perturbation, but they generally treat the target as invariant or construct it through generic sample mixing. Our focus is narrower: defining the target induced by a through-plane MRI observation.
+
+\paragraph{Through-plane modeling and partial volume.}
+Inter-slice augmentation has synthesized intermediate images and labels for supervised segmentation~\cite{wu2020interslice}. MRI slice-profile estimation treats the profile as a one-dimensional through-plane point-spread function~\cite{han2021sliceprofile}. PV-SynthSeg simulates resolution-dependent partial-volume effects to train resolution-robust segmentation~\cite{billot2020pvsynthseg}. These works establish that through-plane resolution and tissue occupancy are coupled. \method differs by placing that coupling inside semi-supervised teacher--student learning and by designing a constrained distribution over paired image--occupancy operators.
+
+\paragraph{Scope of the claim.}
+We do not claim to recover a scanner's physical point-spread function from processed H5 data. The profile family is an acquisition-inspired discrete observation family in normalized slice units. The methodological claim concerns paired supervision and training-only profile-risk design, not scanner calibration, 2.5D inference, or a new segmentation backbone.

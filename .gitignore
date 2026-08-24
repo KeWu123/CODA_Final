@@ -39,3 +39,7 @@ events.out.tfevents.*
 
 # Temporary local copies/screenshots used only for paper-figure style review.
 research/literature/figure_references/
+
+# Local paper-source extraction and dependency staging.
+tmp/
+.deps/

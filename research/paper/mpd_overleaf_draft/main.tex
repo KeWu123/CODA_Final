@@ -1,0 +1,46 @@
+% CVPR 2026 Paper Template; see https://github.com/cvpr-org/author-kit
+\documentclass[10pt,twocolumn,letterpaper]{article}
+
+%%%%%%%%% PAPER TYPE - UPDATE FOR THE FINAL VERSION
+% \usepackage{cvpr}              % CAMERA-READY version
+\usepackage[review]{cvpr}        % REVIEW version
+% \usepackage[pagenumbers]{cvpr} % arXiv version with page numbers
+
+% Import additional packages before hyperref.
+\input{preamble}
+
+\definecolor{cvprblue}{rgb}{0.21,0.49,0.74}
+\usepackage[pagebackref,breaklinks,colorlinks,allcolors=cvprblue]{hyperref}
+
+%%%%%%%%% PAPER ID - UPDATE AFTER ASSIGNMENT
+\def\paperID{*****}
+\def\confName{CVPR}
+\def\confYear{2026}
+
+%%%%%%%%% TITLE
+\title{\method: Moment-Constrained Paired Slice-Profile Learning\\
+for Semi-Supervised MRI Segmentation}
+
+%%%%%%%%% AUTHORS - KEEP ANONYMOUS IN REVIEW MODE
+\author{Anonymous \confName{} Submission}
+
+\begin{document}
+\maketitle
+
+\input{sec/0_abstract}
+\input{sec/1_intro}
+\input{sec/2_related_work}
+\input{sec/3_method}
+\input{sec/4_experiments}
+\input{sec/5_conclusion}
+
+{
+    \small
+    \bibliographystyle{ieeenat_fullname}
+    \bibliography{main}
+}
+
+% WARNING: remove supplementary pages from the main submission PDF.
+% \input{sec/X_suppl}
+
+\end{document}

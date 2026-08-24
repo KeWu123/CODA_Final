@@ -72,7 +72,7 @@
   <!-- Main panels -->
   <rect x="24" y="24" width="968" height="590" rx="16" fill="#F8FAFC" stroke="#DCE4EC"/>
   <rect x="1012" y="24" width="564" height="590" rx="16" fill="#F7F8FA" stroke="#DDE1E7"/>
-  <text x="48" y="58" class="title">(a) Construct three paired training samples</text>
+  <text x="48" y="58" class="title">(a) Paired observations under moment-designed profiles</text>
   <text x="1036" y="58" class="title">(b) Shared optimization</text>
 
   <!-- Lane separators -->
@@ -81,7 +81,7 @@
 
   <!-- Lane 1: native labeled anchor -->
   <rect x="48" y="78" width="105" height="22" rx="11" fill="#357ABD"/>
-  <text x="100" y="93" text-anchor="middle" class="tag">NATIVE LABELED</text>
+  <text x="100" y="93" text-anchor="middle" class="tag">NATIVE LABEL</text>
   <text x="48" y="122" class="laneTitle">Identity path preserves native anatomy</text>
 
   <use href="#mri" x="68" y="132" width="64" height="56" filter="url(#shadow)"/>
@@ -106,7 +106,7 @@
 
   <!-- Lane 2: exact labeled re-acquisition -->
   <rect x="48" y="225" width="120" height="22" rx="11" fill="#138A7A"/>
-  <text x="108" y="240" text-anchor="middle" class="tag">RE-ACQUIRED L</text>
+  <text x="108" y="240" text-anchor="middle" class="tag">PAIRED LABELED</text>
   <text x="48" y="269" class="laneTitle">The same profile transforms image and exact mask</text>
 
   <g filter="url(#shadow)">
@@ -125,8 +125,8 @@
   <rect x="286" y="276" width="139" height="75" rx="11" fill="#FFF3D6" stroke="#D6A343" stroke-width="1.4" filter="url(#shadow)"/>
   <rect x="300" y="287" width="54" height="18" rx="9" fill="#D6A343"/>
   <text x="327" y="300" text-anchor="middle" class="tag">SAME w</text>
-  <text x="355" y="324" text-anchor="middle" class="head">Paired A<tspan baseline-shift="sub" font-size="9">h</tspan></text>
-  <text x="355" y="341" text-anchor="middle" class="small">Σ<tspan baseline-shift="sub" font-size="8">k</tspan> w<tspan baseline-shift="sub" font-size="8">k</tspan>(·)</text>
+  <text x="355" y="324" text-anchor="middle" class="head">Paired profile A<tspan baseline-shift="sub" font-size="9">w</tspan></text>
+  <text x="355" y="341" text-anchor="middle" class="small">w ~ q*; Σ<tspan baseline-shift="sub" font-size="8">k</tspan> w<tspan baseline-shift="sub" font-size="8">k</tspan>(·)</text>
   <path d="M132 306 L283 306" class="tealLine"/>
   <path d="M236 330 L283 330" class="tealLine"/>
 
@@ -146,7 +146,7 @@
   <text x="897" y="317" text-anchor="middle" class="small">target q<tspan baseline-shift="sub" font-size="8">L</tspan></text>
   <path d="M666 313 L752 313" class="tealLine"/>
 
-  <!-- Lane 3: unlabeled paired re-acquisition and OAAC -->
+  <!-- Lane 3: unlabeled paired observation -->
   <rect x="48" y="387" width="111" height="22" rx="11" fill="#E0644A"/>
   <text x="104" y="402" text-anchor="middle" class="tag">UNLABELED U</text>
   <text x="48" y="431" class="laneTitle">Acquisition first; target-preserving appearance second</text>
@@ -176,25 +176,25 @@
   <rect x="399" y="447" width="119" height="78" rx="10" fill="#FFF3D6" stroke="#D6A343" stroke-width="1.4" filter="url(#shadow)"/>
   <rect x="411" y="458" width="54" height="18" rx="9" fill="#D6A343"/>
   <text x="438" y="471" text-anchor="middle" class="tag">SAME w</text>
-  <text x="459" y="495" text-anchor="middle" class="head">Paired A<tspan baseline-shift="sub" font-size="9">h</tspan></text>
-  <text x="459" y="513" text-anchor="middle" class="tiny">image + pseudo mask</text>
+  <text x="459" y="495" text-anchor="middle" class="head">Paired profile A<tspan baseline-shift="sub" font-size="9">w</tspan></text>
+  <text x="459" y="513" text-anchor="middle" class="tiny">w ~ q*; image + pseudo mask</text>
   <path d="M368 482 L396 482" class="tealLine"/>
   <path d="M120 512 L128 512 L128 565 L386 565 L386 512 L396 512" class="tealLine"/>
 
   <rect x="557" y="445" width="154" height="50" rx="10" fill="#FBE4DC" stroke="#E9A08D" filter="url(#shadow)"/>
-  <text x="634" y="465" text-anchor="middle" class="head">OAAC G<tspan baseline-shift="sub" font-size="9">η</tspan></text>
+  <text x="634" y="465" text-anchor="middle" class="head">Appearance G<tspan baseline-shift="sub" font-size="9">η</tspan></text>
   <text x="634" y="484" text-anchor="middle" class="tiny">γ → contrast → brightness</text>
   <text x="634" y="510" text-anchor="middle" class="small">target-preserving</text>
   <path d="M518 464 L554 464" class="coralLine"/>
 
   <rect x="755" y="427" width="196" height="105" rx="11" fill="#FFFFFF" stroke="#E9A08D" filter="url(#shadow)"/>
   <rect x="755" y="427" width="196" height="22" rx="11" fill="#FBE4DC"/>
-  <text x="853" y="443" text-anchor="middle" class="laneTitle">OAAC-U pair</text>
+  <text x="853" y="443" text-anchor="middle" class="laneTitle">Paired-U observation</text>
   <rect x="771" y="461" width="75" height="35" rx="7" fill="#FBE4DC"/>
   <text x="808" y="482" text-anchor="middle" class="small">image x̂<tspan baseline-shift="sub" font-size="8">U</tspan></text>
   <rect x="860" y="461" width="75" height="35" rx="7" fill="#DDF2ED"/>
   <text x="897" y="482" text-anchor="middle" class="small">target q<tspan baseline-shift="sub" font-size="8">U</tspan></text>
-  <text x="853" y="519" text-anchor="middle" class="tiny">q<tspan baseline-shift="sub" font-size="8">U</tspan> bypasses OAAC unchanged</text>
+  <text x="853" y="519" text-anchor="middle" class="tiny">q<tspan baseline-shift="sub" font-size="8">U</tspan> remains spatially aligned</text>
   <path d="M711 464 L752 464" class="coralLine"/>
   <path d="M518 512 L735 512 L735 485 L752 485" class="tealLine"/>
 
@@ -219,7 +219,7 @@
   <text x="1130" y="297" text-anchor="middle" class="tiny">exact fractional occupancy</text>
 
   <rect x="1052" y="415" width="156" height="83" rx="9" fill="#FBE4DC"/>
-  <text x="1130" y="438" text-anchor="middle" class="head">12 × OAAC U</text>
+  <text x="1130" y="438" text-anchor="middle" class="head">12 × Paired U</text>
   <text x="1130" y="458" text-anchor="middle" class="small">x̂<tspan baseline-shift="sub" font-size="8">U</tspan>  |  q<tspan baseline-shift="sub" font-size="8">U</tspan></text>
   <text x="1130" y="477" text-anchor="middle" class="tiny">pseudo fractional occupancy</text>
 
@@ -258,7 +258,7 @@
   <rect x="1350" y="559" width="13" height="13" rx="3" fill="#DDF2ED"/>
   <text x="1371" y="571" class="small">acquisition</text>
   <rect x="1464" y="559" width="13" height="13" rx="3" fill="#FBE4DC"/>
-  <text x="1485" y="571" class="small">OAAC</text>
+  <text x="1485" y="571" class="small">appearance</text>
 
   <!-- Unchanged inference strip -->
   <rect x="24" y="636" width="1552" height="140" rx="16" fill="#F4FAF7" stroke="#CBE3D9"/>
@@ -277,6 +277,6 @@
 
   <rect x="1233" y="671" width="299" height="76" rx="10" fill="#FFFFFF" stroke="#C7DCD4"/>
   <text x="1382" y="696" text-anchor="middle" class="head">Training-only operations are removed</text>
-  <text x="1382" y="718" text-anchor="middle" class="body">no neighboring slices · no A<tspan baseline-shift="sub" font-size="9">h</tspan> · no OAAC</text>
+  <text x="1382" y="718" text-anchor="middle" class="body">all training-only observations are removed</text>
   <text x="1382" y="737" text-anchor="middle" class="small">no extra parameters or inference latency</text>
 </svg>

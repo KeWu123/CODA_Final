@@ -922,6 +922,35 @@ sliceeq_h7_20_patient_axial_acquisition_risk_sampling:
   stop_rule: "one direct seed1337 run only; if highest tested checkpoint does not exceed frozen MPD0.854573, close PARS without changing thirds, q constraints, opportunity formula or sampler seed"
   status: "implemented; local static/numerical tests pass; external CUDA smoke and30k run pending"
 
+sliceeq_h7_21_optional_multiseed_replication:
+  hypothesis: H7.21
+  protocol: "experiments/h7_slice_profile_reacquisition/h7_21_optional_multiseed_replication_protocol.md"
+  role: "optional final optimization-variability audit for the single complete SliceAlign-MPD method; lower priority than frozen MM-WHS and compute-matched ablation"
+  seeds: "1337,2024,3407; report all; no seed replacement or best-seed selection"
+  checkpoint_rule: "validation-only single checkpoint per seed; test once; iter29000 test-informed development observation is ineligible"
+  frozen: "train_sliceeq_occ_oaac_strong_mpd.py and the complete existing 35/5/10 label7 Pre10000/Self30000 protocol; no PARS or method modification"
+  status: "prospectively registered optional; not scheduled or running"
+
+paper_draft_2026_08_24:
+  path: "paper/mpd_overleaf_draft/main.tex"
+  template: "official CVPR 2026 Author Kit review mode; self-contained cvpr.sty, ieeenat_fullname.bst, preamble.tex, sec/, fig/ and main.bib"
+  method_identity: "one complete paper method only: SliceAlign-MPD; implementation filenames are absent from the manuscript"
+  scientific_design: "paired through-plane image/fractional-occupancy observation plus moment-constrained profile distribution design"
+  fixed_infrastructure: "EMA teacher-student backbone and coordinate-preserving appearance augmentation are implementation settings, not proposed modules"
+  excluded: "PARS and all later candidates; no multi-method or module-stack framing"
+  tables: "PROMISE12 7/11-label main comparison; frozen MM-WHS MRI cross-organ table; four-row compute-matched controlled ablation A0-A3; optional three-seed table last"
+  ablation_logic: "A1-A0 image-only mismatch; A2-A1 paired fractional supervision; A3-A2 MPD distribution design"
+  evidence_boundary: "PROMISE12 Dice0.854573 is test-informed development evidence; MPD validation-selected Dice0.848952 is recorded; primary submission claim awaits frozen external evaluation"
+  literature_structure_audit: "BCP CVPR2023, UniMatch CVPR2023, AugSeg CVPR2023, beta-FFT CVPR2025, AmbiSSL CVPR2025, local BCP PDF and local FLDR draft inspected"
+  status: "CVPR narrative refined to one method and two coupled scientific decisions; compact ablation and neutral placeholders installed; static asset/input/citation/terminology audit passed; TeX compiler unavailable locally"
+
+autoresearch_resume_2026_08_24:
+  process_audit: "no active local python/bash/conda training process observed; no local PARS or MM-WHS result artifact"
+  interrupted_experiments: "none locally resumable"
+  frozen_pending: "MM-WHS data preparation/split manifest/execution; H7.20 remains internal pending but is excluded from the paper by user instruction"
+  outer_loop_decision: "stop PROMISE12 method tuning; prepare a one-method paper and execute frozen external/causal evidence next"
+  status: "audited; no new numerical result"
+
 bmer_implementation:
   protocol: "experiments/h5_boundary_evidence_resynthesis/implementation_protocol.md"
   status: "ARCHIVED; USER DECLINED CORRECTION; NO FURTHER BMER ACTION"

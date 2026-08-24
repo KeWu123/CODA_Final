@@ -1,0 +1,122 @@
+\section{Experiments}
+
+\subsection{Experimental Protocol}
+Our experiments answer four questions: (i) does \method{} improve segmentation in low-label regimes; (ii) does the same formulation transfer from prostate to multi-class cardiac MRI; (iii) are paired fractional targets and moment-constrained profile design individually necessary; and (iv) do improvements occur where through-plane partial-volume effects are expected to be strongest?
+
+All methods use identical patient splits, labeled identities, preprocessing, backbone, optimizer, validation cadence, checkpoint selector, and test post-processing. Checkpoints are selected by validation performance only, and each test set is evaluated once after all choices are frozen. For MM-WHS, the profile distribution is recomputed from its labeled training subset using the same support, objective, and constraints as PROMISE12; no validation or test sample is used by the distribution design.
+
+\subsection{Datasets}
+\paragraph{PROMISE12.}
+PROMISE12 contains multi-center, multi-vendor T2-weighted prostate MRI volumes~\cite{litjens2014promise12}. We use the fixed 35/5/10 patient split recorded in the repository. The primary low-label setting exposes 7 of the 35 training annotations; the 11-label setting evaluates annotation scaling. The remaining training cases are treated as unlabeled. Case lists, slice manifests, and preprocessing hashes are held fixed across methods.
+
+\paragraph{MM-WHS MRI.}
+MM-WHS contains clinical 3D cardiac MRI and CT volumes with seven foreground structures~\cite{zhuang2019mmwhs}. We use only MRI. Before training, four of the 20 labeled MRI volumes are locked for validation; four training volumes retain labels and the remaining 12 have labels hidden during optimization. We evaluate myocardium, left/right atria, left/right ventricles, ascending aorta, and pulmonary artery. The exact split manifest is committed before execution.
+
+\subsection{Implementation Details}
+All PROMISE12 experiments use a 2D U-Net with $256\times256$ inputs, SGD with learning rate 0.01, momentum 0.9 and weight decay $10^{-4}$, EMA decay 0.99, and a loader batch of 12 labeled plus 12 unlabeled slices. Training comprises 10,000 supervised pretraining iterations and 30,000 self-training iterations, including a 1,000-iteration supervised warm-up. After warm-up, \method{} evaluates 36 student views per step: 12 native labeled, 12 paired labeled, and 12 paired unlabeled views. The fixed coordinate-preserving appearance policy uses log-gamma $\pm0.25$, log-contrast $\pm0.1875$, and brightness relative to intensity span $\pm0.125$. Seed 1337 is used for the primary comparison.
+
+MM-WHS retains the method definition, profile-design constraints, and validation-only checkpoint policy. Only dataset-dependent class count, preprocessing, and patch sampling are changed. We report model parameters, training time, peak GPU memory, and single-volume inference time.
+
+\subsection{Metrics and Statistics}
+We report patient-level Dice, Jaccard, 95th-percentile Hausdorff distance (HD95), and average surface distance (ASD). MM-WHS distances use physical spacing and are reported in millimeters; macro averages and all seven per-structure Dice scores are included. Primary comparisons are paired by patient. We report mean, standard deviation, median paired difference, and 95\% percentile-bootstrap confidence intervals with 10,000 resamples. A two-sided Wilcoxon signed-rank test is secondary evidence, with Holm correction for multiple comparisons. Statistical tests are not used for checkpoint selection or method tuning.
+
+\subsection{Comparison on PROMISE12}
+Table~\ref{tab:promise_main} compares methods under the same 35/5/10 split and training protocol. Results reported under incompatible partitions or backbones are discussed separately and are not mixed into the matched table.
+
+\begin{table*}[t]
+\centering
+\caption{PROMISE12 comparison under the fixed 35/5/10 split. Higher Dice/Jaccard and lower HD95/ASD are better. Mean$\pm$SD is computed over patients.}
+\label{tab:promise_main}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lcccccccccc}
+\toprule
+& \multicolumn{4}{c}{7 labeled patients} & \multicolumn{4}{c}{11 labeled patients} & \multicolumn{2}{c}{Protocol} \\
+\cmidrule(lr){2-5}\cmidrule(lr){6-9}\cmidrule(lr){10-11}
+Method & Dice $\uparrow$ & Jac. $\uparrow$ & HD95 $\downarrow$ & ASD $\downarrow$
+& Dice $\uparrow$ & Jac. $\uparrow$ & HD95 $\downarrow$ & ASD $\downarrow$
+& Seeds & Test use \\
+\midrule
+Supervised only & \todoresult{} & \todoresult{} & \todoresult{} & \todoresult{}
+& \todoresult{} & \todoresult{} & \todoresult{} & \todoresult{} & 1 & once \\
+Mean Teacher~\cite{tarvainen2017mean} & \todoresult{} & \todoresult{} & \todoresult{} & \todoresult{}
+& \todoresult{} & \todoresult{} & \todoresult{} & \todoresult{} & 1 & once \\
+BCP~\cite{bai2023bcp} & \todoresult{} & \todoresult{} & \todoresult{} & \todoresult{}
+& \todoresult{} & \todoresult{} & \todoresult{} & \todoresult{} & 1 & once \\
+UniMatch~\cite{yang2023unimatch} & \todoresult{} & \todoresult{} & \todoresult{} & \todoresult{}
+& \todoresult{} & \todoresult{} & \todoresult{} & \todoresult{} & 1 & once \\
+$\beta$-FFT~\cite{hu2025betafft} & \todoresult{} & \todoresult{} & \todoresult{} & \todoresult{}
+& \todoresult{} & \todoresult{} & \todoresult{} & \todoresult{} & 1 & once \\
+\midrule
+\method{} (ours) & \todoresult{} & \todoresult{} & \todoresult{} & \todoresult{}
+& \todoresult{} & \todoresult{} & \todoresult{} & \todoresult{} & 1 (3 opt.) & once \\
+\bottomrule
+\end{tabular}}
+\end{table*}
+
+\subsection{Cross-Organ Evaluation on MM-WHS}
+Table~\ref{tab:mmwhs_main} tests whether the same paired observation principle and profile-design procedure transfer from binary prostate segmentation to seven-class whole-heart MRI. The primary endpoint is macro Dice; per-structure results reveal whether gains extend beyond large chambers to myocardium and great vessels.
+
+\begin{table*}[t]
+\centering
+\caption{MM-WHS MRI results under the frozen 4-labeled/12-unlabeled protocol. Method hyperparameters are transferred unchanged; the profile law is designed using labeled training volumes only.}
+\label{tab:mmwhs_main}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lcccccccccc}
+\toprule
+Method & Avg. Dice $\uparrow$ & Avg. HD95 $\downarrow$ & Myo & LA & LV & RA & RV & AO & PA \\
+\midrule
+Supervised only & \todoresult{} & \todoresult{} & \todoresult{} & \todoresult{} & \todoresult{} & \todoresult{} & \todoresult{} & \todoresult{} & \todoresult{} \\
+Mean Teacher & \todoresult{} & \todoresult{} & \todoresult{} & \todoresult{} & \todoresult{} & \todoresult{} & \todoresult{} & \todoresult{} & \todoresult{} \\
+UniMatch & \todoresult{} & \todoresult{} & \todoresult{} & \todoresult{} & \todoresult{} & \todoresult{} & \todoresult{} & \todoresult{} & \todoresult{} \\
+Paired profile (uniform) & \todoresult{} & \todoresult{} & \todoresult{} & \todoresult{} & \todoresult{} & \todoresult{} & \todoresult{} & \todoresult{} & \todoresult{} \\
+\midrule
+\method{} (ours) & \todoresult{} & \todoresult{} & \todoresult{} & \todoresult{} & \todoresult{} & \todoresult{} & \todoresult{} & \todoresult{} & \todoresult{} \\
+\bottomrule
+\end{tabular}}
+\end{table*}
+
+\subsection{Controlled Ablation}
+The main ablation isolates the two claims of \method{} without treating implementation choices as independent modules. All four configurations process 36 student views and use the same appearance policy, optimizer, teacher, and validation selector.
+
+\begin{table*}[t]
+\centering
+\caption{Compact ablation on PROMISE12 with 7 labeled patients. ``Paired target'' denotes the operator-induced fractional occupancy. Every row is matched for student-view count and appearance perturbation.}
+\label{tab:ablation}
+\begin{tabular}{clcccccc}
+\toprule
+ID & Configuration & 36 views & Image profile & Paired target & MPD & Dice $\uparrow$ & HD95 $\downarrow$ \\
+\midrule
+A0 & Compute-matched teacher--student & \cmark & -- & -- & -- & \todoresult{} & \todoresult{} \\
+A1 & Image-profile only & \cmark & \cmark & -- & -- & \todoresult{} & \todoresult{} \\
+A2 & Paired profile, uniform sampling & \cmark & \cmark & \cmark & -- & \todoresult{} & \todoresult{} \\
+A3 & \method{} & \cmark & \cmark & \cmark & \cmark & \todoresult{} & \todoresult{} \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+The contrast A1--A0 tests whether modifying the observation alone creates the predicted image--target mismatch. A2--A1 tests whether pairing the same profile with a fractional target resolves that mismatch. A3--A2 isolates the contribution of moment-constrained distribution design over the uniform parent law. Hard-target and profile-support sensitivity controls are reserved for the supplement because they refine, rather than define, the central hypothesis.
+
+\subsection{Mechanism and Efficiency Analysis}
+We examine performance by normalized axial third and foreground area, with particular attention to apex/base and small-target slices where through-plane composition changes most rapidly. We additionally report non-degenerate occupancy rate, center-slice semantic flip rate, and calibration of predictions against fractional targets. For profile design, we compare worst-stratum utility before and after optimization and report constraint slack, entropy retention, and maximum density ratio. These analyses use frozen predictions and cannot alter the selected checkpoint.
+
+Efficiency is reported as training throughput, peak memory, parameters, FLOPs, and inference latency. Since neighboring slices, the EMA teacher, and profile sampling are removed at test time, the parameter count and inference FLOPs are identical to the underlying 2D network.
+
+\subsection{Optional Independent-Seed Replication}
+Subject to compute availability, the final configuration is replicated with seeds 1337, 2024, and 3407 after all choices are frozen. Every run is reported; no seed is replaced or selected post hoc.
+
+\begin{table}[t]
+\centering
+\caption{Independent-seed replication of the final frozen configuration.}
+\label{tab:seeds}
+\begin{tabular}{lcccc}
+\toprule
+Seed & Dice & Jaccard & HD95 & ASD \\
+\midrule
+1337 & \todoresult{} & \todoresult{} & \todoresult{} & \todoresult{} \\
+2024 & \todoresult{} & \todoresult{} & \todoresult{} & \todoresult{} \\
+3407 & \todoresult{} & \todoresult{} & \todoresult{} & \todoresult{} \\
+\midrule
+Mean$\pm$SD & \todoresult{} & \todoresult{} & \todoresult{} & \todoresult{} \\
+\bottomrule
+\end{tabular}
+\end{table}
