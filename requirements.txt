@@ -1,0 +1,17 @@
+einops
+h5py
+matplotlib
+MedPy
+nibabel
+numpy
+pynrrd
+PyYAML
+scikit-image
+scipy
+SimpleITK
+tensorboardX
+timm
+torch
+torchvision
+tqdm
+yacs

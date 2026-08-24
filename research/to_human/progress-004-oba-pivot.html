@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>研究方向转向：从 BMER 到 OBA</title>
+<style>
+*{box-sizing:border-box}body{margin:auto;max-width:1080px;padding:32px;background:#0d1117;color:#c9d1d9;font:16px/1.65 system-ui,"Microsoft YaHei",sans-serif}header{text-align:center;padding:36px 0;border-bottom:1px solid #30363d}h1,h2{color:#f0f6fc}h1{font-size:34px;margin:0}h2{font-size:22px;border-bottom:1px solid #30363d;padding-bottom:8px;margin-top:40px}.sub{color:#8b949e;font-size:18px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(205px,1fr));gap:14px;margin:28px 0}.card,.chart,.next{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:20px}.value{font-size:30px;font-weight:700;color:#58a6ff}.good{color:#3fb950}.bad{color:#f85149}.label{color:#8b949e;font-size:13px}table{border-collapse:collapse;width:100%}th,td{text-align:left;padding:10px;border-bottom:1px solid #30363d}th{color:#8b949e;font-size:13px}.tag{border-radius:10px;padding:2px 8px;font-size:12px}.yes{background:#0d2818;color:#3fb950}.no{background:#2d1215;color:#f85149}.active{background:#0c2d6b;color:#58a6ff}code{color:#d2a8ff}.formula{text-align:center;font-size:19px;color:#f0f6fc;padding:12px}.next{border-color:#1158c7}li{margin:7px 0}footer{text-align:center;color:#484f58;margin-top:42px}</style>
+</head>
+<body>
+<header><h1>从外观合成转向变换轨道平衡</h1><p class="sub">综合 CoDA 与 BMER：保留可靠标注锚点，只在无标注分支测试零均值的成对干预</p><p class="label">Autoresearch 外循环 7 · 2026-08-11 · 2 个外部运行结果</p></header>
+
+<div class="grid">
+ <div class="card"><div class="value">0.78–0.80</div><div class="label">用户报告 Baseline Dice</div></div>
+ <div class="card"><div class="value good">0.819876</div><div class="label">CoDA Test Dice（探索性）</div></div>
+ <div class="card"><div class="value bad">0.795949</div><div class="label">BMER Test Dice</div></div>
+ <div class="card"><div class="value bad">9 / 10</div><div class="label">BMER 相比 CoDA 退化病例</div></div>
+</div>
+
+<section><h2>结果讲出了什么</h2><div class="card"><p>CoDA 的完整运行对无标注学生输入施加强视图，并同时改变目标与损失，结果高于当前未配对 baseline 区间；因此它不是“明确失败”，只是无法归因。BMER 只改动精确 GT 的标注学生输入，训练在 15.4k 后退化，测试落回 baseline 区间。这个对照不足以证明所有标注增强有害，但足以停止 donor 驱动的标注图像合成，把标注分支重新视为优化锚点。</p></div></section>
+
+<section><h2>观测轨迹</h2><div class="chart">
+<svg viewBox="0 0 900 330" width="100%" role="img" aria-label="Baseline, CoDA and BMER Dice comparison">
+ <rect width="900" height="330" rx="8" fill="#161b22"/>
+ <g stroke="#30363d" stroke-dasharray="4"><line x1="90" y1="60" x2="840" y2="60"/><line x1="90" y1="130" x2="840" y2="130"/><line x1="90" y1="200" x2="840" y2="200"/><line x1="90" y1="270" x2="840" y2="270"/></g>
+ <g fill="#8b949e" font-size="13"><text x="42" y="65">0.83</text><text x="42" y="135">0.81</text><text x="42" y="205">0.79</text><text x="42" y="275">0.77</text></g>
+ <rect x="90" y="165" width="750" height="70" fill="#58a6ff" opacity=".10"/><text x="99" y="226" fill="#58a6ff" font-size="12">用户报告 baseline 区间 0.78–0.80</text>
+ <polyline points="250,200 470,95 690,179" fill="none" stroke="#8b949e" stroke-width="2"/>
+ <circle cx="250" cy="200" r="8" fill="#58a6ff"/><circle cx="470" cy="95" r="8" fill="#3fb950"/><circle cx="690" cy="179" r="8" fill="#f85149"/>
+ <g fill="#c9d1d9" font-size="14" text-anchor="middle"><text x="250" y="300">Baseline 中点*</text><text x="470" y="300">CoDA</text><text x="690" y="300">BMER</text></g>
+ <g font-size="14" text-anchor="middle"><text x="250" y="187" fill="#58a6ff">0.79*</text><text x="470" y="80" fill="#3fb950">0.819876</text><text x="690" y="164" fill="#f85149">0.795949</text></g>
+</svg><p class="label">* baseline 只有用户报告范围，没有同一 seed/病例的配对文件；连线只展示研究过程，不代表统计显著性。</p>
+</div></section>
+
+<section><h2>顶会排雷后的空位</h2><table><thead><tr><th>看似自然的方向</th><th>主要顶会占位</th><th>判断</th></tr></thead><tbody>
+<tr><td>置信度/难度自适应增强</td><td>AugSeg、SAA、iMAS</td><td><span class="tag no">不作为主线</span></td></tr>
+<tr><td>Teacher 保真、Student 困难的增强</td><td>TeachAugment, CVPR 2022</td><td><span class="tag no">碰撞过近</span></td></tr>
+<tr><td>双强视图或冲突视图</td><td>UniMatch、CCVC、Diverse Co-training</td><td><span class="tag no">需超越随机双视图</span></td></tr>
+<tr><td>监督/无监督梯度修正</td><td>POS, ICCV 2025</td><td><span class="tag no">仅作对照</span></td></tr>
+<tr><td>变换轨道的平衡采样</td><td>密集分割中未见直接等价方案</td><td><span class="tag active">主假设 H6</span></td></tr>
+</tbody></table></section>
+
+<section><h2>首选：Orbit-Balanced Augmentation（OBA）</h2><div class="card"><p>对同一个无标注样本，不再只采一个单向强增强，而是在有明确恒等元的 nuisance 坐标中同时构造 <code>T(+a)</code> 与 <code>T(−a)</code>，使用 baseline 原有的 LCC 硬伪标签和 CE+Dice：</p><div class="formula">L<sub>OBA</sub> = ½[ℓ(f(T<sub>+a</sub>(x<sub>u</sub>)), ŷ) + ℓ(f(T<sub>−a</sub>(x<sub>u</sub>)), ŷ)]</div><p>局部展开中，一阶及其他奇数阶漂移相消，保留二阶曲率正则。首批算子只考虑 log-gamma、互逆平滑乘性 bias 与 ±Gaussian 控制；不把 blur、erase 或 donor 合成生硬包装成“反向”变换。</p></div></section>
+
+<section><h2>为什么可能达到文章核心，而不是模块</h2><div class="grid">
+<div class="card"><strong>Motivation</strong><p>随机增强通常只规定边缘分布，不规定采样设计。硬伪标签下，单向有限采样可能造成系统性方向漂移。</p></div>
+<div class="card"><strong>Single core</strong><p>一个采样规则、一条损失公式；不改 teacher、target、network 或 inference。</p></div>
+<div class="card"><strong>Mechanism</strong><p>可以在训练前直接测量正负视图的 logit 位移相关性与均值漂移，而不是只看最终 Dice。</p></div>
+<div class="card"><strong>Novelty boundary</strong><p>不声称发明 antithetic sampling；贡献是 hard-pseudo-label dense prediction 的 orbit quadrature。</p></div>
+</div></section>
+
+<section><h2>必须先过的 Kill Gates</h2><div class="next"><ol>
+<li><strong>零训练 Gate 0：</strong>冻结同一模型，证明 +a/−a 的有符号预测位移呈负相关，且均值漂移显著小于两个 IID 同成本视图。</li>
+<li><strong>3k–5k Gate 1：</strong>同一预训练权重比较 B0 baseline、B1 单强视图、B2 双 IID、B3 OBA、B4 打乱配对。B3 必须胜过 B2 与 B4，而不只是胜过 B0。</li>
+<li><strong>正式 Gate 2：</strong>至少三 seeds、病例配对统计、物理 HD95/ASD、NSD；PROMISE12 之外至少 cardiac 与一个 3-D organ 数据集。</li>
+</ol><p>若不能胜过双 IID 或 shuffled-pair，对“轨道平衡”的解释即被否证，不叠加 selector、soft target 或额外 head 抢救。</p></div></section>
+
+<footer>Generated by Autoresearch · 方向选择不等于保证 CVPR 接收，机制证据与跨数据集结果才决定文章级别。</footer>
+</body></html>

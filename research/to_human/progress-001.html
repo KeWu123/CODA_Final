@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PROMISE12 半监督增强研究进展</title>
+<style>
+:root{--bg:#0b1020;--panel:#121a2c;--line:#273452;--text:#e8edf7;--muted:#9ba9c4;--blue:#6ab7ff;--green:#62d49a;--amber:#ffc66d;--red:#ff7d86}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 system-ui,"Microsoft YaHei",sans-serif}.wrap{max-width:1080px;margin:auto;padding:38px 24px 70px}header{padding:48px 0 34px;border-bottom:1px solid var(--line)}h1{font-size:38px;line-height:1.2;margin:0 0 14px}.lead{max-width:840px;color:var(--muted);font-size:19px}.tag{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:5px 11px;margin:12px 7px 0 0;color:var(--blue);background:#111a30}section{margin-top:42px}h2{font-size:25px;margin:0 0 16px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:15px}.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px}.card h3{margin:0 0 8px;font-size:18px;color:var(--blue)}.card p{margin:0;color:var(--muted)}.alert{border-left:4px solid var(--red);background:#281826;padding:18px 20px;border-radius:8px}.good{border-left-color:var(--green);background:#10251f}.flow{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:10px;align-items:center}.node{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:17px;text-align:center}.arrow{color:var(--muted);font-size:24px}table{width:100%;border-collapse:collapse;background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden}th,td{padding:12px 14px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{color:var(--muted);font-size:13px;text-transform:uppercase}.yes{color:var(--green)}.no{color:var(--red)}.maybe{color:var(--amber)}.plane{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}.caption{color:var(--muted);font-size:14px;margin-top:8px}.next{display:grid;grid-template-columns:55px 1fr;gap:11px 16px}.num{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:#17335a;color:var(--blue);font-weight:700}.next h3{margin:0 0 3px}.next p{margin:0;color:var(--muted)}footer{margin-top:48px;border-top:1px solid var(--line);padding-top:18px;color:var(--muted);font-size:14px}@media(max-width:720px){.flow{grid-template-columns:1fr}.arrow{transform:rotate(90deg);text-align:center}h1{font-size:30px}}
+</style>
+</head>
+<body><main class="wrap">
+<header>
+  <h1>从“更强增强”转向“困难但可信的增强”</h1>
+  <p class="lead">PROMISE12 半监督分割的文献启动与创新性审查。当前结论：继续做 Copy-Paste、拼接、频域或按置信度调强度，撞题概率很高；更有希望的主线是显式分离增强的语义有效性与训练价值。</p>
+  <span class="tag">2026-08-10</span><span class="tag">18 篇核心文献卡片</span><span class="tag">状态：待机制验证</span>
+</header>
+
+<section>
+  <h2>先纠正基线命名</h2>
+  <div class="alert"><strong>去掉 Copy-Paste 后不能再称为 BCP。</strong> BCP 的核心贡献与官方 ACDC 预训练阶段都依赖 Copy-Paste。论文中应写成“Mean Teacher（源自 BCP 代码的实现）”，并增加一个独立、干净的标准 Mean Teacher 作为对照。</div>
+</section>
+
+<section>
+  <h2>为什么常见方案不够新</h2>
+  <div class="grid">
+    <div class="card"><h3>跨样本混合已拥挤</h3><p>BCP、ABD、OMF、PSC、MiDSS、M3HL、SF-DA 已覆盖矩形粘贴、前景交换、patch shuffle、对称翻转与拼接。</p></div>
+    <div class="card"><h3>自适应强度已有先例</h3><p>AugSeg 使用置信度，DPCL 使用样本难度与学习进度；单纯把 RandAugment 变成 curriculum 很难成立。</p></div>
+    <div class="card"><h3>频域与生成式也已进入顶会</h3><p>FRCNet/MiDSS 覆盖频域一致性与风格迁移，CVPR 2026 的 MatchMask 已把扩散生成增强推进到半监督分割。</p></div>
+  </div>
+</section>
+
+<section>
+  <h2>核心重构：同一增强要回答两个问题</h2>
+  <div class="plane">
+  <svg viewBox="0 0 900 410" width="100%" role="img" aria-label="增强有效性和训练价值二维图">
+    <rect x="0" y="0" width="900" height="410" fill="#121a2c"/>
+    <line x1="90" y1="340" x2="840" y2="340" stroke="#9ba9c4" stroke-width="2"/>
+    <line x1="90" y1="340" x2="90" y2="45" stroke="#9ba9c4" stroke-width="2"/>
+    <text x="455" y="390" fill="#9ba9c4" text-anchor="middle">学生困难度 / 学习价值 →</text>
+    <text x="25" y="190" fill="#9ba9c4" text-anchor="middle" transform="rotate(-90 25 190)">教师不稳定度 / 语义风险 →</text>
+    <rect x="505" y="235" width="300" height="85" rx="12" fill="#12392d" stroke="#62d49a"/>
+    <text x="655" y="270" fill="#62d49a" text-anchor="middle" font-size="19" font-weight="700">目标：困难但有效</text>
+    <text x="655" y="297" fill="#cfeade" text-anchor="middle">学生被挑战，教师仍稳定</text>
+    <circle cx="210" cy="292" r="12" fill="#ffc66d"/><text x="230" y="299" fill="#ffc66d">太容易：几乎无梯度</text>
+    <circle cx="720" cy="105" r="12" fill="#ff7d86"/><text x="740" y="112" fill="#ff7d86">破坏性增强：伪监督失真</text>
+    <path d="M120 225 C310 215,470 205,805 195" stroke="#6ab7ff" stroke-width="2" stroke-dasharray="7 6" fill="none"/>
+    <text x="270" y="198" fill="#6ab7ff">有效性阈值</text>
+  </svg>
+  <div class="caption">现有方法常用一个置信度同时代替这两个维度。ViSA-MT 计划用教师跨变换稳定性估计有效性，用学生—教师差异估计训练价值。</div>
+  </div>
+</section>
+
+<section>
+  <h2>ViSA-MT 最小方法</h2>
+  <div class="flow">
+    <div class="node"><strong>1. 教师弱视图</strong><br><span class="caption">生成基础伪标签与可靠性</span></div><div class="arrow">→</div>
+    <div class="node"><strong>2. K 个候选强视图</strong><br><span class="caption">教师稳定性 V；学生困难度 D</span></div><div class="arrow">→</div>
+    <div class="node"><strong>3. 约束选择</strong><br><span class="caption">在 V ≤ 阈值中最大化 D</span></div>
+  </div>
+  <p class="caption">第一版只做样本级选择和 3 个候选，不加入 Copy-Paste、拓扑模块、对比学习或新解码器，先验证核心信号。</p>
+</section>
+
+<section>
+  <h2>与最近工作的本质区别</h2>
+  <table><thead><tr><th>方法</th><th>控制信号</th><th>是否跨样本混合</th><th>与 ViSA-MT 的边界</th></tr></thead><tbody>
+    <tr><td>AugSeg</td><td>预测置信度</td><td class="yes">是</td><td>没有分别测量变换有效性与学生学习价值</td></tr>
+    <tr><td>ABD</td><td>patch 置信度排名</td><td class="yes">是</td><td>通过替换区域修复不可靠输入，而非选择完整候选视图</td></tr>
+    <tr><td>DPCL</td><td>样本难度 + 学习进度</td><td class="maybe">含特征混合</td><td>调节扰动强度，但未建立教师有效性—学生价值约束</td></tr>
+    <tr><td>ViSA-MT</td><td>教师变换稳定性 + 学生差异</td><td class="no">否</td><td>选择最困难的可信视图，无推理额外开销</td></tr>
+  </tbody></table>
+</section>
+
+<section>
+  <h2>第一个实验不是训练，而是证伪</h2>
+  <div class="alert good"><strong>H1.1：</strong>把有标签验证病例临时当作无标签，比较“教师跨增强不稳定度”与“增强导致的真实伪标签误差增量”。只有两者在患者级别稳定正相关，才值得训练完整方法。预设工程门槛：中位 Spearman ρ ≥ 0.4、检测有害增强 AUROC ≥ 0.7。</div>
+</section>
+
+<section>
+  <h2>两周可执行路径</h2>
+  <div class="next">
+    <div class="num">1</div><div><h3>清理基线</h3><p>独立 Mean Teacher、BCP-derived no-mix、UniMatch-style weak-to-strong 三者分开。</p></div>
+    <div class="num">2</div><div><h3>建立患者级协议</h3><p>PROMISE12 50 个有标签病例做 5 折；训练折内隐藏标签，不做 slice 随机切分。</p></div>
+    <div class="num">3</div><div><h3>运行 H1.1 离线审计</h3><p>先用 5 种强度可控的灰度/MRI 变换，验证有效性分数是否有预测力。</p></div>
+    <div class="num">4</div><div><h3>只训练四个关键条件</h3><p>固定强增强、仅困难度、仅有效性、困难但有效；三次随机种子并报告区间。</p></div>
+    <div class="num">5</div><div><h3>决定投稿级别</h3><p>若只在 PROMISE12 有效，优先 MICCAI/MedIA；若跨 ACDC、LA/NIH 与自然分割均成立，再冲 CVPR。</p></div>
+  </div>
+</section>
+
+<footer>Autoresearch bootstrap report · 尚无训练结果，所有性能结论均为待验证假设。</footer>
+</main></body></html>

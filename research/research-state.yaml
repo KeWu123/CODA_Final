@@ -1,0 +1,945 @@
+project:
+  title: "SliceEq: Acquisition-Equivariant Fractional Occupancy for Semi-Supervised MRI Segmentation"
+  question: "Can a shared non-invertible slice-profile operator re-acquire neighboring MR signal and exact/teacher-derived tissue occupancy together, correcting the label-invariance failure of conventional strong augmentation while preserving single-slice 2D inference?"
+  status: active
+  started: "2026-08-10"
+  domain: "semi-supervised medical image segmentation"
+
+continuity:
+  requested_by_skill: true
+  status: unavailable
+  reason: "This session exposes neither /loop nor cron tools; continuation must be triggered manually."
+
+baseline:
+  user_description: "BCP with Copy-Paste removed, retaining an EMA Mean Teacher"
+  normalized_name: "EMA hard-pseudo-label self-training (BCP-derived implementation)"
+  source_path: "code/train_baseline.py"
+  audited: "2026-08-11"
+  split_policy: "LOCKED: use the existing train_slices.list, val.list, test.list, labelnum mapping, and index order without modification"
+  defaults: "2D U-Net; 2 classes; 256x256; 10k supervised pretrain + 30k self-train; batch 24 = 12 labeled + 12 unlabeled; labelnum 7; SGD lr 0.01; EMA 0.99; seed 1337"
+  warning: "The copied baseline gives teacher and student the same unlabeled tensor, then converts the teacher output to a largest-component hard label. It is not yet weak-to-strong consistency. Removing Copy-Paste also removes BCP's defining mechanism."
+  hashes:
+    train_baseline_py: "54393FCB977A3E4F199420885B6F6ACBD8B1D2B320C820979F355C003CD3EEC8"
+    test_baseline_py: "31CC57D26FB3476F55A593445E10BBC4EFA96E6DBFDE778BAA2D65C599491682"
+    dataset_py: "7A5B3C28EBEAF7AA2F64E5F111F88BD15F6075AFC53238B477BD1A8511B2206A"
+
+implementation:
+  path: "code/train_coda.py"
+  status: "CODE_AUDITED; ONE EXTERNAL RUN ARTIFACT ARCHIVED; CURRENT ENTRY AMENDED TO SHARED PRE10000 CHECKPOINT"
+  source_isolation: "Parallel baseline and CoDA entry points exist in the current workspace"
+  method_scope: "Current CoDA simultaneously changes strong view, teacher target representation, loss implementation, and uniform entropy coupling"
+  validation: "Static code/test-contract audit plus one external self-training log and performance file; archived run checkpoint/event identity remains unavailable. The current entry now strictly loads the fixed shared Pre10000 net+opt checkpoint and does not rerun pretraining."
+  import_limit: "No numerical conclusion can be reproduced in this workspace without the user's external data/training environment"
+  split_status: "The current workspace contains no verifiable PROMISE12 list/data artifacts; historical E-drive state is not accessible in this session"
+
+desktop_deployment:
+  baseline_path: "E:/Desktop/Baseline"
+  train_entry: "E:/Desktop/Baseline/code/train_coda.py"
+  test_entry: "E:/Desktop/Baseline/code/test_coda.py"
+  data_root_default: "E:/Desktop/PROMISE12"
+  experiment_default: "CoDA_MT_PROMISE12"
+  isolation: "Parallel files only; train_baseline.py, test_baseline.py, and dataloaders/dataset.py hashes remain unchanged"
+  split_contract: "35 train cases / 940 train slices / first 7 cases = first 191 slices / 5 val / 10 test; four list SHA-256 hashes enforced at runtime"
+  validation: "14/14 tests passed; the callback is pickleable and a real four-worker Windows-spawn DataLoader read a PROMISE12 batch; all 955 referenced H5 assets have valid HDF5 signatures; sampled train/val/test image-label structures are valid"
+  status: "HISTORICAL_RECORD; NOT RE-VERIFIED IN CURRENT SESSION"
+  split_hash_policy: "Canonical ordered-entry hashes ignore LF versus CRLF and UTF-8 BOM, but still reject entry changes or reordering"
+  resolved_blocker: "User replaced Git LFS pointers with real H5 objects; initial raw-hash error was only LF-to-CRLF conversion, while canonical list contents match exactly"
+  windows_spawn_fix: "Both CoDA training stages use one module-level seed_data_worker through functools.partial; num_workers=4 and seed+worker_id behavior are unchanged"
+
+literature:
+  sliceeq_sota_audit:
+    date: "2026-08-11"
+    scope: "Public PROMISE12 semi-supervised segmentation with 20% labeled training volumes; local results excluded"
+    closest_top_conference_sota:
+      method: "PMPC"
+      venue: "AAAI 2026"
+      dice: "85.80 +/- 1.07"
+      protocol: "50 volumes, 7:1:2 split, 20% labeled, U-Net, three runs"
+    broad_published_frontier:
+      method: "Dual-teacher comparative learning with B2CP"
+      venue: "Biomedical Signal Processing and Control 2026"
+      dice: "87.50"
+      comparability_warning: "Different dual-teacher CE-Net/SCFR and pretrained-encoder regime; exact patient-list equivalence not established"
+    sliceeq_screen_gate: ">=86.0 Dice at the fixed seed; continuation evidence only"
+    sliceeq_publication_target: ">=87.5 Dice for an unqualified SOTA claim, plus matched surface metrics and protocol"
+  key_papers:
+    - id: tarvainen2017mt
+      title: "Mean teachers are better role models"
+      venue: "NeurIPS 2017"
+    - id: bai2023bcp
+      title: "Bidirectional Copy-Paste for Semi-Supervised Medical Image Segmentation"
+      venue: "CVPR 2023"
+    - id: yang2023unimatch
+      title: "Revisiting Weak-to-Strong Consistency in Semi-Supervised Semantic Segmentation"
+      venue: "CVPR 2023"
+    - id: zhao2023augseg
+      title: "Augmentation Matters"
+      venue: "CVPR 2023"
+    - id: chi2024abd
+      title: "Adaptive Bidirectional Displacement"
+      venue: "CVPR 2024"
+    - id: huang2026semigda
+      title: "SemiGDA"
+      venue: "CVPR 2026"
+    - id: mai2026hess
+      title: "From Softmax to Dirichlet"
+      venue: "CVPR 2026"
+    - id: sohn2020fixmatch
+      title: "FixMatch"
+      venue: "NeurIPS 2020"
+    - id: heinonen2025mollification
+      title: "Robust Classification by Coupling Data Mollification with Label Smoothing"
+      venue: "AISTATS 2025"
+    - id: assefa2025dycon
+      title: "DyCON"
+      venue: "CVPR 2025"
+    - id: chaitanya2021taskda
+      title: "Semi-supervised Task-driven Data Augmentation"
+      venue: "Medical Image Analysis 2021"
+    - id: huo2023arhnet
+      title: "ARHNet"
+      venue: "MLMI 2023"
+    - id: liu2024keepmix
+      title: "A Data Augmentation Approach that Ensures the Reliability of Foregrounds"
+      venue: "Image and Vision Computing 2024"
+    - id: hu2025betafft
+      title: "beta-FFT"
+      venue: "CVPR 2025"
+    - id: suzuki2022teachaugment
+      title: "TeachAugment"
+      venue: "CVPR 2022"
+    - id: sun2025pos
+      title: "Two Losses, One Goal"
+      venue: "ICCV 2025"
+    - id: jia2026antithetic
+      title: "Antithetic Noise in Diffusion Models"
+      venue: "ICLR 2026"
+    - id: shin2023sd_cuda
+      title: "SDC-UDA: Volumetric Unsupervised Domain Adaptation Framework for Slice-Direction Continuous Cross-Modality Medical Image Segmentation"
+      venue: "CVPR 2023"
+    - id: cai2023desco
+      title: "Orthogonal Annotation Benefits Barely-Supervised Medical Image Segmentation"
+      venue: "CVPR 2023"
+    - id: wu2020interslice
+      title: "Inter-Slice Image Augmentation Based on Frame Interpolation for Boosting Medical Image Segmentation Accuracy"
+      venue: "ECAI 2020"
+    - id: han2023espreso
+      title: "ESPRESO: An Algorithm to Estimate the Slice Profile of a Single Magnetic Resonance Image"
+      venue: "Magnetic Resonance Imaging 2023"
+    - id: billot2020_pvsynthseg
+      title: "Partial Volume Segmentation of Brain MRI Scans of Any Resolution and Contrast"
+      venue: "MICCAI 2020"
+    - id: billot2023_synthseg
+      title: "SynthSeg: Segmentation of Brain MRI Scans of Any Contrast and Resolution Without Retraining"
+      venue: "Medical Image Analysis 2023"
+    - id: borges2024_acquisition_invariant
+      title: "Acquisition-Invariant Brain MRI Segmentation With Informative Uncertainties"
+      venue: "Medical Image Analysis 2024"
+    - id: kumari2025_ambissl
+      title: "Annotation Ambiguity Aware Semi-Supervised Medical Image Segmentation"
+      venue: "CVPR 2025"
+    - id: muthukrishnan2025e3pose
+      title: "Equivariant Symmetry-Aware Head Pose Estimation for Fetal MRI"
+      venue: "arXiv preprint 2025"
+    - id: c3_2025
+      title: "Clinically-Guided Counterfactuals: Physics and Pathology-Aware Augmentation and Evaluation for Robust Medical Imaging Models"
+      venue: "MedEurIPS workshop 2025"
+  open_problems:
+    - "Existing adaptive augmentation usually conflates pseudo-label confidence, augmentation validity, and training difficulty."
+    - "Cross-patient mixing can create artificial boundaries and anatomically implausible contexts."
+    - "Strong augmentation is useful only in a narrow region: too weak gives zero gradient; too strong changes or obscures the target."
+    - "Weak-to-strong SSL keeps pseudo-label certainty fixed even when blur, noise, downsampling, or erasing reduces the evidence available to the student."
+    - "PROMISE12 evaluations are often vulnerable to patient leakage, unstable label subsets, and single-dataset claims."
+    - "Existing augmentation is usually defined in Cartesian image coordinates rather than in object-relative normal/tangential boundary coordinates."
+    - "It is unknown whether the unlabeled set expands boundary-evidence support beyond the small labeled subset, or whether a simple local contrast jitter is sufficient."
+    - "Weak-to-strong methods sample augmentation marginals, but rarely test whether a balanced transformation-space design reduces finite-sample orbit drift under hard pseudo-labels."
+    - "Slice-wise SSL treats each reconstructed MRI slice as a zero-thickness 2D image even though a 2D multi-slice acquisition integrates anatomy through a slice-profile PSF before sampling."
+    - "Most augmentation assumes label invariance or geometric equivariance; acquisition changes instead require the image and tissue occupancy target to pass through the same forward operator."
+  evidence_gaps:
+    - "No experimental evidence yet that teacher transformation stability predicts true augmentation-induced pseudo-label error on PROMISE12."
+    - "No experimental evidence yet that realistic degradation produces target over-certainty or that spatially coupled pseudo-target entropy improves PROMISE12 segmentation."
+    - "The baseline code is audited, but the copied folder contains no PROMISE12 list files, checkpoints, baseline logs, or performance.txt; numerical reproduction must occur in the Linux data environment."
+    - "One external CoDA log/performance pair reports test Dice 0.819876, but has no paired baseline artifact, checkpoint hash, exact command/seed record, or TensorBoard mechanism traces; it remains exploratory rather than confirmatory evidence."
+    - "No oracle intervention yet shows that a full boundary-normal profile has an ordered causal effect beyond matched scalar contrast or blur."
+    - "No evidence yet shows that profiles extracted from teacher LCC masks preserve GT-derived profile ordering."
+    - "No evidence yet shows that antithetic transformation pairs produce negatively correlated prediction displacements or outperform two IID views at matched compute."
+    - "No experiment yet shows that paired slice-profile re-acquisition improves the locked baseline or UniMatch while preserving image-target agreement at prostate apex/base slices."
+
+hypotheses:
+  - id: H1
+    statement: "Among candidate strong views, selecting the view with maximum student difficulty subject to low teacher transformation inconsistency improves Dice and HD95 over random strong augmentation."
+    status: pending
+    motivation: "Separates semantic validity from optimization utility instead of treating confidence as both."
+    parent: null
+    priority: medium
+  - id: H1.1
+    statement: "Teacher transformation inconsistency is positively correlated with oracle pseudo-label error measured on held-out labeled volumes."
+    status: pending
+    motivation: "This is the mechanistic premise of H1 and must be validated before full training."
+    parent: H1
+    priority: high
+  - id: H2
+    statement: "An MRI-physics augmentation bank improves cross-center robustness more than a generic color/blur bank when used with the same validity-informativeness selector."
+    status: pending
+    motivation: "PROMISE12 contains multi-center, multi-vendor, multi-protocol appearance variation."
+    parent: H1
+    priority: medium
+  - id: H3
+    statement: "A carefully tuned fixed weak-to-strong Mean Teacher closes most of the gain attributed to complex medical SSL methods."
+    status: pending
+    motivation: "Mandatory simplicity test and guard against a weak baseline."
+    parent: null
+    priority: high
+  - id: H4
+    statement: "Within the locked baseline and split, coupling dense pseudo-target entropy to the local evidence loss produced by the sampled strong augmentation improves Dice/HD95 and calibration over hard, fixed-soft, and image-aware-static soft targets."
+    status: exploratory_positive_mechanism_unresolved
+    motivation: "Standard weak-to-strong consistency transforms the image but treats target certainty as invariant, even for information-destroying transformations."
+    parent: null
+    priority: high
+  - id: H4.1
+    statement: "As corruption severity increases, hard-target Mean Teacher becomes increasingly overconfident and eventually exhibits negative transfer relative to a severity-coupled soft target."
+    status: unverified
+    motivation: "This failure curve is the required empirical observation behind a BCP-level story."
+    parent: H4
+    priority: high
+  - id: H5
+    statement: "Resynthesizing unlabeled boundary-manifold evidence on labeled recipient anatomy with unchanged hard GT improves boundary and region metrics over the locked baseline and severity-matched global/local augmentation controls."
+    status: rejected_by_user_and_negative_evidence
+    motivation: "The small labeled subset may under-sample real interface contrast, transition width, partial-volume pattern, and adjacent-tissue texture even when global image appearance is covered."
+    parent: null
+    priority: high
+  - id: H5.1
+    statement: "A full two-sided boundary-normal evidence intervention produces an ordered, band-localized prediction response that cannot be reproduced by matched scalar contrast or blur."
+    status: archived_without_further_action
+    motivation: "This is the mandatory mechanism and novelty gate before any BMER training run."
+    parent: H5
+    priority: highest
+  - id: H5.2
+    statement: "Teacher-LCC-derived unlabeled evidence profiles preserve the ordering and shape of GT-derived profiles sufficiently to estimate an augmentation distribution."
+    status: archived_without_further_action
+    motivation: "Without measurement fidelity, the unlabeled profile bank is another confirmation-bias channel."
+    parent: H5
+    priority: highest
+  - id: H6
+    statement: "On pseudo-labeled unlabeled images, antithetic transformation pairs improve segmentation over two IID same-cost views by canceling odd-order augmentation-orbit drift."
+    status: closed_without_rescue_after_full_run_and_strong_comparator
+    motivation: "OBA tests at 0.818872, is mean-neutral versus CoDA, deteriorates persistently after its 13.8k validation peak, and is below the user-reported UniMatch result of about 0.83. Shared pretraining remains necessary for fair attribution but is no longer sufficient reason to spend another full run on H6."
+    parent: null
+    priority: highest
+  - id: H6.1
+    statement: "At matched marginal severity, +a/-a views have negatively correlated signed prediction displacement and smaller mean drift than two IID views on held-out labeled cases."
+    status: not_run_no_longer_decision_critical
+    motivation: "This is the necessary observable behind OBA's local odd-order cancellation claim."
+    parent: H6
+    priority: archived
+  - id: H7
+    statement: "Applying the same stochastic MRI slice-profile re-acquisition operator to neighboring image signal and exact/teacher-derived tissue occupancy improves slice-wise semi-supervised segmentation over target-invariant augmentation without changing the inference network."
+    status: primary_direction_selected_causal_attribution_controls_pending
+    motivation: "CoDA and OBA perturb observations while retaining a target formed on a different evidence distribution. SliceEq instead models a physically grounded observation change and transforms tissue occupancy with the identical operator, exploiting adjacent-slice anatomy that the locked 2D baseline currently discards."
+    parent: null
+    priority: highest
+  - id: H7.1
+    statement: "Within a preregistered slice-profile range, joint image-target re-acquisition preserves central-slice anatomy substantially better than image-only slab averaging and yields target changes concentrated at physically plausible partial-volume boundaries."
+    status: unverified_tensorboard_activity_trace_not_supplied
+    motivation: "This is the minimum validity gate; failure means the operator is merely mislabeled blur and H7 must be rejected before a full run."
+    parent: H7
+    priority: highest
+  - id: H7.2
+    statement: "Preserving slice-profile-weighted fractional tissue occupancy and anchoring it with an exact-GT re-acquired labeled view improves median-case and acquisition-stratified boundary performance over hard-argmax SliceEq."
+    status: selected_primary_method_user_confirmed_development_dice_0_844566
+    motivation: "The locked development comparison is SliceEq about 0.832603 to SliceEqOcc about 0.844566, an absolute gain of 0.011963. The v1 center coefficient is below one half over only about 3.5% of sampled profile space, so hard argmax likely discards most paired-target information; fractional occupancy activates the intended forward-model supervision without CoDA-style uniform background contamination."
+    parent: H7
+    priority: highest
+  - id: H7.3
+    statement: "Normalizing the re-acquired segmentation risk over the acquisition-induced fractional-occupancy residual prevents the physically informative interface signal from being diluted by consensus background and interior pixels."
+    status: rejected_by_preregistered_gate1_residual_gradient_already_dominant
+    motivation: "Only about 0.82-0.88% of pixels are fractional and mean occupancy deviation is about 0.0016-0.0018, while the current CE/Dice objectives aggregate over the full image."
+    parent: H7
+    priority: closed
+  - id: H7.4
+    statement: "Commuting the sampled slice-profile operator with a topology-preserving teacher posterior yields more faithful local fractional occupancy than applying it after hard/LCC pseudo segmentation."
+    status: rejected_by_preregistered_fidelity_gate
+    motivation: "H7.3 Gate 2 shows high residual support overlap and sample-mass correlation but only 0.3485 pixelwise magnitude correlation; Gate 1 rules out insufficient boundary gradient as the bottleneck."
+    parent: H7
+    priority: closed
+  - id: H7.5
+    statement: "Replacing independent per-sample profile draws with batch-stratified low-order quadrature over the unchanged physical profile distribution reduces acquisition-gradient estimation variance without changing batch size, target representation, loss, network, or inference graph."
+    status: rejected_no_material_gain_user_confirmed
+    motivation: "The completed SliceEqSAQ trial produced no material gain. Mechanistically, its four nodes are balanced across different anatomy samples rather than within the same conditional risk; they preserve mean center weight (about 0.625) but truncate the IID center-weight range from about 0.485--0.855 to only 0.532/0.718. Sampling variance is therefore not retained as the primary bottleneck."
+    parent: H7
+    priority: closed
+  - id: H7.6
+    statement: "Conditioning paired slice-profile re-acquisition on trustworthy acquisition geometry in physical coordinates and sharing one coherent virtual protocol across a scan improves robustness to through-plane protocol shift over fixed slice-unit, per-sample IID SliceEqOcc."
+    status: split_into_h7_6a_implemented_and_physical_stage_deferred
+    motivation: "The current sigma/phase range is defined in slice units and sampled independently for each training sample, whereas physical support varies with acquisition geometry and a real scanner protocol is volume-level. This extension strengthens the acquisition motivation without changing the paired occupancy mechanism or inference graph."
+    parent: H7
+    priority: high_after_attribution
+  - id: H7.6a
+    statement: "Sharing one continuously sampled virtual slice profile across every slice of a case within an epoch, while preserving cross-case stratified and cross-epoch continuous coverage, improves SliceEqOcc over independent per-slice profiles."
+    status: rejected_external_run_test_dice_0_836219
+    motivation: "The current H5/list contract exposes reliable case identity but no verified spacing or thickness. H7.6a therefore tests the scan-level correlation structure without pretending to perform physical calibration. Randomized stratification preserves the original sigma/phase ranges and tails, avoiding SliceEqSAQ's fixed-node truncation."
+    parent: H7.6
+    priority: closed
+  - id: H7.11
+    statement: "Two train-mode teacher occupancies projected by the same SliceEq profile can use operator-space dropout disagreement to suppress reducible pseudo-target instability without suppressing agreed fractional occupancy."
+    status: rejected_external_run_neutral_to_parent
+    motivation: "The labeled-only H7.10 screen found that post-operator JS ranked exact occupancy error, but the full intervention must be nontrivial and improve the locked parent validation trajectory to justify a reliability component."
+    parent: H7.2
+    priority: closed
+  - id: H7.12
+    statement: "Forming one 26-connected hard pseudo occupancy over each three-slice unlabeled slab before the existing SliceEq measurement improves acquisition-target coherence over independent per-slice 2-D component filtering."
+    status: rejected_external_run_neutral_to_parent
+    motivation: "The current target construction assumes the three retained masks describe one latent anatomical source slab, yet independent 2-D LCC can retain disconnected structures on adjacent slices. This error is systematic and therefore invisible to the near-identity ADU disagreement weighting."
+    parent: H7.2
+    priority: closed
+  - id: H7.13
+    statement: "Composing a coordinate-preserving monotonic appearance perturbation after paired through-plane re-acquisition improves weak-to-strong consistency while preserving the acquisition-derived fractional occupancy target."
+    status: validation_proxy_positive_test_selected_oracle_unbiased_confirmation_pending
+    motivation: "Recent pseudo-topology and stochastic-reliability successors were near-identity interventions. H7.13 acts on every post-warmup unlabeled re-acquired student view while retaining the full SliceEqOcc target, batch, loss, teacher, validation, and inference contracts."
+    parent: H7.2
+    priority: highest
+  - id: H7.19
+    statement: "A global phase-symmetric profile distribution designed from labeled-training exact occupancy can improve worst patient/index-stratum retained fractional information while matching the parent profile moments and image perturbation budget."
+    status: positive_user_selected_highest_checkpoint_final_method
+    motivation: "ARCP showed that per-stack image-response equalization is the wrong objective, while bin integration, wider support and nonlinear fusion introduce severity, teacher-BN or target-pairing confounds. H7.19 is the final bounded test of whether the parent profile distribution, rather than its linear operator, can be improved without validation/test or model feedback."
+    parent: H7.2
+    priority: selected_final_method
+  - id: H7.20
+    statement: "Replacing post-warmup slice-uniform stream sampling with one frozen patient-balanced axial-support distribution designed from exact labeled fractional-occupancy opportunity improves the final MPD acquisition risk without changing the model or objective."
+    status: implemented_awaiting_external_full_run
+    motivation: "MPD robustly designs which through-plane operators are sampled, but the parent TwoStream sampler still weights patients in proportion to slice count and can let dense axial regions dominate SGD. H7.20 aligns the data-support distribution with the same paired acquisition risk while avoiding prediction/loss/uncertainty-driven hard mining."
+    parent: H7.19
+    priority: next_single_run
+
+experiments:
+  proxy_metric: "Image-target acquisition agreement and boundary-localized occupancy change under sampled slice profiles; then same-checkpoint Dice, physical HD95, normalized surface Dice, and apex/mid/base stratification"
+  baseline_value: "user-confirmed final Dice range 0.78-0.80 for the BCP-derived no-Copy-Paste EMA baseline; accepted without local re-verification"
+  best_value: "User-selected final PROMISE12 development result is SliceEqOcc-OAAC-Strong-MPD iter29000 at Dice0.854573. Selection follows the user's highest-tested-checkpoint criterion rather than validation-best. The earlier trajectory was SliceEq0.832603, SliceEqOcc0.844566 and OAAC-Strong0.851960."
+  total_runs: 12
+  locked_development_trajectory: "BCP-derived EMA baseline0.78-0.80 -> SliceEq0.832603 -> SliceEqOcc0.844566 -> SliceEqOcc-OAAC-Strong0.851960 -> SliceEqOcc-OAAC-Strong-MPD0.854573"
+  attribution_note: "The trajectory is accepted as the development evidence. Causal component claims still require batch/view/teacher/initialization-matched controls."
+  reported_strong_comparator: "The user reports a Baseline-folder UniMatch implementation averaging about 0.83; treat this as the next-method performance floor pending artifact import, not as a replacement for the locked baseline."
+  trajectory:
+    - experiment_id: "coda_external_2026-08-11"
+      hypothesis: H4
+      evidence_class: exploratory
+      metric_value: 0.819876
+      metric: "10-case legacy test Dice"
+      baseline: "0.78-0.80 user-reported range"
+      delta: "+0.019876 to +0.039876 absolute"
+      validation_best: 0.804897
+      validation_best_iteration: 27200
+      validation_final: 0.797537
+      change_summary: "Current four-factor CoDA recipe; causal component unresolved"
+      artifact: "experiments/h4_evidence_coupled_target/results/coda_external_run_2026-08-11"
+    - experiment_id: "bmer_external_2026-08-11"
+      hypothesis: H5
+      evidence_class: exploratory_incomplete
+      metric_value: 0.795949
+      metric: "10-case legacy test Dice"
+      baseline: "0.78-0.80 user-reported range"
+      delta: "-0.004051 to +0.015949 absolute"
+      validation_best: 0.788501
+      validation_best_iteration: 15400
+      validation_last: 0.767375
+      last_iteration: 20800
+      paired_delta_vs_coda: -0.023927
+      change_summary: "Current BMER v1; incomplete run; 9/10 test cases lose Dice versus archived CoDA"
+      artifact: "experiments/h5_boundary_evidence_resynthesis/results/bmer_external_run_2026-08-11"
+    - experiment_id: "oba_external_2026-08-11"
+      hypothesis: H6
+      evidence_class: exploratory_single_seed
+      metric_value: 0.818872
+      metric: "10-case legacy test Dice"
+      baseline: "0.78-0.80 user-reported range"
+      delta: "+0.018872 to +0.038872 absolute"
+      validation_best: 0.793850
+      validation_best_iteration: 13800
+      validation_final: 0.699411
+      pretrain_validation_best: 0.679773
+      pretrain_validation_best_iteration: 7800
+      pretrain_validation_final: 0.570292
+      paired_delta_vs_coda: -0.001004
+      paired_wins_vs_coda: "3/10; median delta -0.016190"
+      tail_signal: "case Dice SD 0.036590 vs CoDA 0.051567; minimum Dice 0.766989 vs 0.746351; exploratory"
+      change_summary: "Complete OBA; mean-neutral versus CoDA but severe late validation collapse"
+      artifact: "experiments/h6_orbit_balanced_augmentation/results/oba_external_run_2026-08-11"
+    - experiment_id: "sliceeq_external_2026-08-11"
+      hypothesis: H7
+      evidence_class: exploratory_single_seed_shared_checkpoint
+      metric_value: 0.832603
+      metric: "10-case legacy test Dice"
+      baseline: "0.78-0.80 user-reported range; identical-checkpoint baseline run not supplied"
+      delta: "+0.032603 to +0.052603 versus the unpaired user-reported baseline range"
+      validation_best: 0.811287
+      validation_best_iteration: 24800
+      validation_final: 0.788273
+      paired_delta_vs_coda: 0.012728
+      paired_wins_vs_coda: "4/10; median delta -0.018262; top-three-case concentration"
+      paired_delta_vs_oba: 0.013732
+      paired_wins_vs_oba: "5/10; median delta +0.003500"
+      checkpoint_sha256: "49e8883039a5712102dc17c5277009504b55c232a10a0af1de4d26fbb414b9b9"
+      change_summary: "Direction-selection success; stable phase-wise validation improvement and best archived mean, but paired occupancy mechanism is unresolved and the mean gain is case-concentrated"
+      artifact: "experiments/h7_slice_profile_reacquisition/results/sliceeq_external_run_2026-08-11"
+    - experiment_id: "sliceeq_occ_external_2026-08-11"
+      hypothesis: H7.2
+      evidence_class: exploratory_single_seed_shared_checkpoint
+      metric_value: 0.827368
+      metric: "10-case legacy test Dice for validation-selected unet_best_model.pth"
+      baseline: "0.78-0.80 user-reported range; identical-checkpoint baseline run not supplied"
+      validation_best: 0.817373
+      validation_best_iteration: 30000
+      validation_final: 0.817373
+      paired_delta_vs_sliceeq_v1: -0.005235
+      paired_wins_vs_sliceeq_v1: "4/10; median delta -0.005058"
+      checkpoint_sha256: "49e8883039a5712102dc17c5277009504b55c232a10a0af1de4d26fbb414b9b9"
+      mechanism_activity: "post-warmup mean fractional-pixel fraction L=0.008214, U=0.008797; U hard-change fraction=0.000026"
+      oracle_checkpoint_observation: "artifact-backed iteration 23000, val 0.815152, test Dice 0.844566; exact model path and per-case metrics supplied, checkpoint binary hash absent; user reports adjacent earlier checkpoints near 0.84; test-selected and non-primary"
+      oracle_delta_vs_selected_final: 0.017198
+      oracle_paired_wins_vs_selected_final: "9/10; median delta +0.012773"
+      oracle_delta_vs_sliceeq_v1: 0.011963
+      oracle_paired_wins_vs_sliceeq_v1: "5/10; median delta +0.002077"
+      change_summary: "Fractional occupancy is demonstrably active; the 23k checkpoint is a broad 9/10-case improvement over the selected final model and a strong exploratory positive result, while multiple tested checkpoints expose validation-test rank instability"
+      artifact: "experiments/h7_slice_profile_reacquisition/results/sliceeq_occ_external_run_2026-08-11"
+    - experiment_id: "h7_3_gates_external_2026-08-12"
+      hypothesis: H7.3
+      evidence_class: confirmatory_preregistered_mechanism_gate
+      metric_value: 0.6565133436270211
+      metric: "exact-GT residual-support share of full CE+Dice logit-gradient norm"
+      threshold: "<0.20"
+      result: "failed Gate 1; joint stop_h7_3"
+      labeled_support_fraction: 0.008426686232002618
+      labeled_gradient_enrichment: 77.90883931737416
+      gate2_result: "pass: support IoU 0.771941, mass Pearson 0.992766, pixel Pearson 0.348508, outside mass 0.112088"
+      gate3_result: "pass: fractional-vs-binary gradient cosine 0.933901"
+      checkpoint_sha256: "3f3515e6411d8a50877ba6b660c82fcb9752eab524172315a3e8f8b7845c8052"
+      change_summary: "No training change; result rejects residual reweighting and localizes the next bottleneck to pseudo-occupancy magnitude rather than gradient dilution"
+      artifact: "experiments/h7_slice_profile_reacquisition/results/h7_3_gates_external_2026-08-12"
+    - experiment_id: "h7_4_posterior_commutation_gate_external_2026-08-12"
+      hypothesis: H7.4
+      evidence_class: confirmatory_preregistered_zero_training_gate
+      metric_value: 0.6590745728882551
+      metric: "raw-posterior exact-support Brier ratio versus hard LCC"
+      result: "joint stop_posterior_commutation; neither candidate passes all four locked criteria"
+      raw_result: "Brier ratio 0.659075 pass; Pearson 0.828573 pass; outside mass 0.231295 fail; full-image ratio 0.763318 pass"
+      topology_gated_result: "Brier ratio 0.892700 fail; Pearson 0.780727 pass; outside mass 0.152661 fail; full-image ratio 0.936941 pass"
+      reproduction: "exact H7.3 hard-LCC match for all six locked quantities at tolerance 1e-6; checkpoint SHA-256 matched"
+      checkpoint_sha256: "3f3515e6411d8a50877ba6b660c82fcb9752eab524172315a3e8f8b7845c8052"
+      change_summary: "No training change; result closes posterior/target/loss modifications and redirects optimization to the sampling estimator of the unchanged acquisition operator distribution"
+      artifact: "experiments/h7_slice_profile_reacquisition/results/h7_4_posterior_commutation_gate_external_2026-08-12"
+    - experiment_id: "sliceeq_saq_external_user_report_2026-08-13"
+      hypothesis: H7.5
+      evidence_class: user_confirmed_qualitative_full_run
+      metric: "no material Dice improvement over SliceEqOcc; exact value not requested or rechecked"
+      result: "negative; close SAQ and retain only as an appendix ablation"
+      sampler_analysis: "IID center weight range about 0.4851--0.8552 and mean 0.6249; SAQ only about 0.5325/0.7179 with mean 0.6252, so it preserves first-order mean severity while deleting tails"
+      change_summary: "Batch-marginal low-order quadrature does not improve the selected main method and is no longer an optimization direction"
+    - experiment_id: "sliceeq_occ_oaac_external_2026-08-14"
+      hypothesis: H7.13
+      evidence_class: exploratory_single_seed_test_selected_oracle_checkpoint
+      metric_value: 0.849538
+      metric: "10-case legacy test Dice for iter27000.pth; selected as the maximum among multiple test-evaluated checkpoints; not validation-selected"
+      validation_best: 0.834863
+      validation_best_iteration: 23800
+      validation_at_tested_iteration: 0.828406
+      validation_final: 0.831964
+      delta_vs_accepted_sliceeq_occ_development: 0.004972
+      paired_wins_vs_sliceeq_occ: "7/10; median delta +0.0026095"
+      mechanism_activity: "all 146 records active_samples=1.0; mean normalized absolute appearance change 0.055178"
+      artifact: "experiments/h7_slice_profile_reacquisition/results/sliceeq_occ_oaac_external_run_2026-08-14"
+      change_summary: "High-coverage successor with a positive validation proxy and an apparent post-hoc oracle delta; iter27k was selected by test maximum, so unbiased OAAC confirmation remains unavailable"
+    - experiment_id: "sliceeq_occ_oaac_strong_external_2026-08-17"
+      hypothesis: H7.15
+      evidence_class: positive_single_seed_validation_selected_development_result
+      metric_value: 0.851960
+      metric: "10-case legacy test Dice for unchanged validation-best checkpoint iter29400"
+      validation_best: 0.836475
+      validation_best_iteration: 29400
+      validation_final: 0.828680
+      delta_validation_vs_oaac_scale100: 0.001612
+      delta_test_vs_previous_oaac_oracle: 0.002422
+      mechanism_activity: "all 146 records active; mean normalized absolute appearance change 0.068954"
+      artifact: "experiments/h7_slice_profile_reacquisition/results/sliceeq_occ_oaac_strong_external_run_2026-08-17"
+      change_summary: "Joint 1.25x OAAC severity is positive on unchanged validation and crosses 0.85 with the validation-best model, but only two scale points exist and late variance increases; authorize one 1.50x outer bracket"
+    - experiment_id: "sliceeq_occ_oaac_scale150_external_2026-08-17"
+      hypothesis: H7.16
+      evidence_class: negative_neutral_validation_selected_outer_bracket
+      metric_value: 0.852059
+      metric: "10-case legacy test Dice for validation-best iter29400; descriptive only"
+      validation_best: 0.835796
+      validation_best_iteration: 29400
+      validation_final: 0.831386
+      delta_validation_vs_scale125: -0.000679
+      delta_test_vs_scale125: 0.000099
+      paired_wins_vs_scale125: "2/10; median delta -0.002196"
+      mechanism_activity: "all 146 records active; mean normalized appearance change 0.082723"
+      artifact: "experiments/h7_slice_profile_reacquisition/results/sliceeq_occ_oaac_scale150_external_run_2026-08-17"
+      change_summary: "The stronger bracket is active but fails validation replacement and is test-neutral with worse secondary metrics; retain scale1.25 and close OAAC severity tuning"
+    - experiment_id: "sliceeq_occ_oaac_strong_arcp_external_2026-08-18"
+      hypothesis: H7.18
+      evidence_class: neutral_negative_single_seed_validation_selected_development_result
+      metric_value: 0.851062
+      validation_best: 0.838425
+      validation_best_iteration: 29800
+      validation_final: 0.830195
+      delta_validation_vs_strong_parent: 0.001950
+      shortfall_vs_preregistered_validation_line: -0.001050
+      delta_test_vs_strong_parent: -0.000898
+      artifact: "experiments/h7_slice_profile_reacquisition/results/sliceeq_occ_oaac_strong_arcp_external_run_2026-08-18"
+      change_summary: "Active H5-only profile calibration weakly improves validation but fails the locked margin and test replacement; close ARCP rescue"
+    - experiment_id: "sliceeq_occ_oaac_strong_mpd_external_2026-08-19"
+      hypothesis: H7.19
+      evidence_class: positive_final_under_user_defined_highest_tested_checkpoint_policy
+      metric_value: 0.854573
+      metric: "10-case legacy test Dice for iter29000.pth; corrected attachment; checkpoint is not validation-selected"
+      validation_best: 0.836008
+      validation_best_iteration: 25800
+      validation_at_tested_iteration: 0.828270
+      validation_final: 0.827233
+      delta_validation_vs_strong_parent: -0.000467
+      delta_test_vs_strong_parent: 0.002613
+      secondary_metric_delta_vs_strong: "Jaccard +0.003983; HD95 +0.027655 worse; ASD +0.017634 worse"
+      superseded_attachment: "wrongly supplied unet_best_model report sha52ae817d... with Dice0.848952"
+      mechanism_activity: "nontrivial q; 20/21 active RFI strata; entropy retention98.83%; late validation SD0.003777"
+      artifact: "experiments/h7_slice_profile_reacquisition/results/sliceeq_occ_oaac_strong_mpd_external_run_2026-08-19"
+      change_summary: "Corrected iter29k report gives the highest observed development Dice and is selected as final under the user's explicit highest-tested-checkpoint policy; freeze without further PROMISE12 tuning"
+
+outer_loop:
+  cycle: 33
+  last_direction: implement_h7_20_pars_as_single_post_warmup_sampler_intervention
+  last_reflection: "MPD is frozen as the successful profile-distribution optimization. H7.20 PARS is now implemented as the only high-priority successor: iter0--999 use the exact parent sampler; post-warmup sampling cycles patients uniformly and draws one globally frozen index-third law designed from exact-L acquisition opportunity under MPD. No U label, model difficulty, uncertainty, loss, validation or test enters the design. All parent model/training/inference contracts remain frozen."
+
+primary_direction:
+  id: SliceEqOccOAACStrongMPD
+  public_name: "SliceEqOcc-OAAC-MPD"
+  name: "Robust Moment-Profiled Acquisition-Aligned Fractional Occupancy with Ordered Appearance Consistency"
+  core: "Use labeled-training exact occupancy to design one global phase-symmetric distribution over the three-slice Gaussian profile domain under moment, image-residual, density and entropy constraints. Sample this frozen distribution and apply each profile identically to neighboring MR images and exact/teacher masks to form fractional occupancy, then apply coordinate-preserving OAAC only to the re-acquired U student image."
+  baseline_change: "Relative to OAAC-Strong, MPD replaces only the profile sampler with the frozen designed q. Network, Pre10000 state, student36 batch, EMA train mode, losses/ramp, OAAC scale1.25, optimizer/LR, validation, checkpoint cadence and single-slice inference remain unchanged."
+  status: "FINAL SELECTED METHOD BY USER-DEFINED HIGHEST-CHECKPOINT POLICY: SliceEqOcc-OAAC-Strong-MPD iter29000, PROMISE12 development Dice0.854573. The checkpoint is explicitly selected by observed test performance rather than validation-best; MM-WHS evaluation remains pending."
+  locked_development_delta: "descriptive trajectory: baseline0.78-0.80 -> SliceEq0.832603 -> SliceEqOcc0.844566 -> OAAC-Strong0.851960 -> OAAC-Strong-MPD0.854573"
+  next_method_hypothesis: "Run the isolated H7.20 PARS successor once. It preserves the exact parent sampler for iter0--999, then replaces only slice-entry draws with patient-uniform cycling and one exact-L-designed frozen axial-third law shared by L/U. Do not combine OAAC joint-distribution or endpoint changes in this run."
+  working_title: "SliceEqOcc-OAAC-MPD: Robust Moment-Profiled Fractional Occupancy for Semi-Supervised MRI Segmentation"
+
+publication_plan_2026_08_13:
+  strategy: "Under the user's highest-tested-checkpoint criterion, SliceEqOcc-OAAC-Strong-MPD is the final PROMISE12 method at Dice0.854573. Freeze it and construct the paper around paired fractional occupancy, ordered OAAC and robust global moment-profile design; use Strong as the direct sampler control and MM-WHS as the planned external validation."
+  causal_protocol: "experiments/h7_slice_profile_reacquisition/cvpr_causal_ablation_protocol.md"
+  h7_6_protocol: "experiments/h7_slice_profile_reacquisition/h7_6_protocol_conditioned_scan_coherent_protocol.md"
+  human_report: "to_human/sliceeq_occ_cvpr_strategy_2026-08-13.md"
+  novelty_audit: "literature/40_sliceeq_occ_cvpr_novelty_audit_2026-08-13.md"
+  public_baseline_name: "BCP-derived EMA hard-pseudo-label scaffold (Copy-Paste removed); original BCP must be a separate comparator"
+  minimum_core_matrix: "B0, B0-36, ImgOnly-36, SliceHard-36, SliceEqOcc-36, SliceEqOcc-OAAC-Strong; one locked seed1337 each"
+  extensions: "L-only/U-only factorial; ordered-versus-generic appearance control; second label budget if affordable; prospectively locked MM-WHS MRI external validation of final MPD with OAAC-Strong as its direct sampler control"
+  seed_policy: "User explicitly declines multi-seed validation. Use seed1337 for every matched run, never select a seed by result, report patient-level paired statistics, and disclose optimization-seed variance as unmeasured."
+  tuning_policy: "Profile and scalar OAAC-strength tuning are closed. The user has reopened a componentwise method audit, not unrestricted tuning. At most one distributional component may be changed per experiment: first patient/axial slice-entry risk, then optionally OAAC joint-parameter distribution. Never stack them in a first run or retune a failed component from test cases."
+  prohibited_rescues: "SAQ node tuning, residual/boundary reweighting, posterior commutation, generic uncertainty/attention modules, or test-selected sigma/phase/checkpoint"
+  locked_development_trajectory: "baseline0.78-0.80 -> hard SliceEq0.832603 -> full SliceEqOcc0.844566 -> OAAC-Strong0.851960 -> final MPD0.854573"
+  current_status: "The user explicitly selected SliceEqOcc-OAAC-Strong-MPD under a highest-tested-checkpoint policy and does not require validation-best identity. Final PROMISE12 development Dice is0.854573 at iter29000. MPD remains frozen. H7.20 PARS is implemented and awaits one external30k run; MM-WHS MRI remains the planned external evaluation."
+
+oba_implementation:
+  protocol: "experiments/h6_orbit_balanced_augmentation/implementation_protocol.md"
+  train_entry: "../code/train_oba.py"
+  test_entry: "../code/test_oba.py"
+  operator: "../code/utils/oba.py"
+  tests: "../tests/test_oba.py and ../tests/test_oba_contract.py"
+  status: "implemented; prospective entry now loads the fixed shared Pre10000 net+opt checkpoint and runs Self30000 only; archived result predates this amendment"
+  effective_batch: "loader 24 (12 L + 12 U); post-warmup student forward 36 (12 L + 12 U+ + 12 U-)"
+  evidence_class: "one exploratory fixed-seed full run: test Dice 0.818872; best val 0.793850 at 13.8k; final val 0.699411"
+  result_status: "mean-neutral versus CoDA (-0.001004), wins 3/10 cases, possible hard-case tail benefit, severe late collapse"
+  next_gate: "CLOSED by outer-loop opportunity-cost decision; the IID control would still be scientifically required to claim OBA, but is not required to abandon OBA and is not recommended as the next full run."
+  fairness_protocol: "experiments/h6_orbit_balanced_augmentation/shared_pretrain_protocol.md"
+  initialization_confound: "Archived OBA pretrain best val 0.679773 vs user-reported CoDA about 0.71 and baseline about 0.73. Prospective CoDA/OBA/SliceEq entries now share one checkpoint, but archived metrics remain confounded."
+
+pretrain_checkpoint_reuse:
+  policy: "CoDA, OBA, and SliceEq default to exactly one fixed baseline Pre10000 checkpoint; allow only explicit relocation override; do not auto-search or choose among runs. Require both network and optimizer state, record SHA-256, and reset the self-training RNG."
+  default_path: "/home/aiteam/zhengtaoma/UniMatch_35_5_10_Pre10000_Self30000_label7_seed1337_7_labeled/pre_train/unet/unet_best_model.pth"
+  active_entries: "code/train_coda.py, code/train_oba.py, code/train_sliceeq.py"
+  inspected_reference: "C:/Users/005060/Desktop/Baseline/code/train_unimatch_samatch_qg.py"
+  reference_pattern: "Required --match_pre_checkpoint; resolve to an absolute Path; fail if not a file; pass the single path downstream. No other design from that script is adopted."
+
+sliceeq_implementation:
+  protocol: "experiments/h7_slice_profile_reacquisition/implementation_protocol.md"
+  train_entry: "../code/train_sliceeq.py"
+  test_entry: "../code/test_sliceeq.py"
+  dataset: "../code/dataloaders/sliceeq_dataset.py"
+  operator: "../code/utils/sliceeq.py"
+  tests: "../tests/test_sliceeq.py and ../tests/test_sliceeq_contract.py"
+  profile: "three real within-case slices; Gaussian sigma [0.45,0.85] slice units; virtual phase [-0.25,0.25] slice units"
+  scope: "first 1k exact baseline identity; thereafter unlabeled-only paired image and detached EMA/LCC hard occupancy re-acquisition; labeled central slice unchanged"
+  checkpoint_contract: "default /home/aiteam/zhengtaoma/UniMatch_35_5_10_Pre10000_Self30000_label7_seed1337_7_labeled/pre_train/unet/unet_best_model.pth, with explicit CLI override allowed; strict net+opt restoration; SHA-256 log; self-training RNG reset; no discovery"
+  validation: "six SliceEq contract tests and all 23 available source-contract tests passed; two data checks skipped because the fixed Linux root is absent locally; py_compile passed; tensor tests blocked because local lightweight Python has no loadable PyTorch"
+  evidence_status: "one archived fixed-seed run: best validation 0.811287 at 24.8k, final validation 0.788273, test Dice 0.832603; exceeds archived CoDA/OBA but essentially ties user-reported UniMatch; gains are case-concentrated and TensorBoard mechanism traces were not supplied"
+
+sliceeq_occ_implementation:
+  hypothesis: H7.2
+  protocol: "experiments/h7_slice_profile_reacquisition/h7_2_fractional_occupancy_protocol.md"
+  train_entry: "../code/train_sliceeq_occ.py"
+  test_entry: "../code/test_sliceeq_occ.py"
+  utility: "../code/utils/sliceeq_occ.py"
+  tests: "../tests/test_sliceeq_occ.py and ../tests/test_sliceeq_occ_contract.py"
+  experiment_default: "SliceEqOcc_PROMISE12"
+  scope: "first 1k exact baseline identity; then one student forward with 12 original labeled, 12 exact-GT reacquired labeled, and 12 detached-LCC reacquired unlabeled inputs; retain full fractional occupancy for both reacquired targets"
+  loss: "Lsup=0.5*(original hard CE+Dice + reacquired labeled soft CE+Dice); L=Lsup+inherited_lambda*reacquired unlabeled soft CE+Dice"
+  profile: "unchanged from v1: radius 1, sigma [0.45,0.85], phase [-0.25,0.25]; independent seeded labeled/unlabeled profile RNG streams"
+  inference: "unchanged 2D U-Net; strict exact checkpoint; prediction NIfTI saving defaults False through --save_result/--save_results alias; checkpoint auto-search False"
+  validation: "new sources pass py_compile and Ruff E9/F checks; six new contract tests and 23 cross-version source-contract tests pass; v1 hashes unchanged; tensor tests are written but blocked locally by the Windows PyTorch c10.dll initialization failure"
+  evidence_status: "one archived seed-1337 run: selected best val 0.817373 at 30k and test Dice 0.827368; fractional activity L=0.008214/U=0.008797 with U hard-change 0.000026. A supplied 23k performance artifact identifies val 0.815152 and test Dice 0.844566, winning 9/10 cases versus the selected final model; checkpoint binary hash remains absent and the result is post-hoc test-selected."
+
+sliceeq_h7_3_gates:
+  hypothesis: H7.3
+  protocol: "experiments/h7_slice_profile_reacquisition/h7_3_gate_protocol.md"
+  analysis_entry: "../code/analyze_sliceeq_gates.py"
+  utility: "../code/utils/sliceeq_gates.py"
+  tests: "../tests/test_sliceeq_gates.py and ../tests/test_sliceeq_gates_contract.py"
+  checkpoint_default: "/home/aiteam/zhengtaoma/CoDA/model/SliceEqOcc_PROMISE12_7_labeled/self_train/unet/iter_23000_dice_0.8152.pth"
+  scope: "read-only frozen-model diagnostics; all 191 labeled slices and first 192 unlabeled slices by default; unlabeled H5 labels are not read; one JSON artifact; no optimizer, backward, training, or checkpoint write"
+  locked_thresholds: "Gate1 exact-GT CE+Dice residual gradient share <0.20; Gate2 union-support pixel Pearson >=0.30, active-sample residual-mass Pearson >=0.30, proxy mass outside exact support <=0.50; Gate3 exact-GT fractional-vs-binary soft-CE gradient cosine <0.98"
+  evidence_limit: "iteration-23000 checkpoint stores only student state_dict, so Gate2 uses frozen student eval-mode LCC predictions as a provisional proxy and must not be described as direct EMA-teacher evidence"
+  validation: "four source-contract tests and six unchanged SliceEqOcc contract tests pass; all new sources pass py_compile; tensor tests are present but cannot execute locally because the only Python lacks PyTorch/CUDA"
+  result_artifact: "experiments/h7_slice_profile_reacquisition/results/h7_3_gates_external_2026-08-12"
+  result: "Gate1 fail at 0.656513 versus <0.20; Gate2 pass; Gate3 pass; joint stop_h7_3"
+  conclusion: "H7.3 closed; do not implement residual dual-measure training or retune thresholds"
+  status: "completed and rejected by preregistered Gate 1"
+
+sliceeq_h7_4_gate:
+  hypothesis: H7.4
+  protocol: "experiments/h7_slice_profile_reacquisition/h7_4_posterior_commutation_gate_protocol.md"
+  analysis_entry: "../code/analyze_sliceeq_posterior_gate.py"
+  utility: "../code/utils/sliceeq_posterior.py"
+  tests: "../tests/test_sliceeq_posterior.py and ../tests/test_sliceeq_posterior_gate_contract.py"
+  question: "Does raw or topology-gated posterior commutation improve exact occupancy fidelity over hard-LCC occupancy without causing off-support acquisition change?"
+  pass_rule: "candidate exact-support Brier <=0.85x hard; residual Pearson >=0.50; outside residual mass <=0.15; full-image Brier <=1.05x hard"
+  variants: "current hard-LCC occupancy, raw posterior commutation, topology-gated posterior commutation"
+  reproduction_guard: "must reproduce H7.3 hard-LCC samples, support pixels, pixel/mass Pearson, IoU, outside mass within absolute 1e-6 and match checkpoint SHA-256 before deciding"
+  validation: "new sources pass py_compile; four H7.4 source-contract tests, four H7.3 gate contracts, and six SliceEqOcc preservation contracts pass; numerical tensor tests are written but local Python lacks PyTorch"
+  result_artifact: "experiments/h7_slice_profile_reacquisition/results/h7_4_posterior_commutation_gate_external_2026-08-12"
+  result: "exact H7.3 reproduction pass; raw candidate fails outside-mass; topology-gated candidate fails exact-support Brier and outside-mass; joint stop_posterior_commutation"
+  conclusion: "H7.4 closed; do not relax thresholds, implement a posterior target variant, or continue SliceEq target/loss modifications"
+  status: "completed and rejected by preregistered fidelity gate"
+
+sliceeq_h7_5_gate:
+  hypothesis: H7.5
+  protocol: "experiments/h7_slice_profile_reacquisition/h7_5_acquisition_risk_quadrature_gate_protocol.md"
+  question: "Is current single-profile sampling a materially noisy estimator of the unchanged SliceEqOcc acquisition-risk expectation, and can fixed low-order quadrature reduce that error at acceptable compute?"
+  scope: "read-only gate first; no posterior target, confidence mask, residual weighting, gradient balancing, severity selector, or schedule change"
+  candidate: "Within each 12-sample labeled/unlabeled branch, assign each of the four 2x2 Gauss-Legendre nodes three times after an independent seeded permutation; compare with the current 12 IID draws and a dense per-sample reference at identical batch/forward cost"
+  user_override: "On 2026-08-12 the user explicitly requested the complete next implementation without running the gate first. This changes evidence class, not the locked hypothesis."
+  status: "gate skipped by user; subsequent full SliceEqSAQ result is user-confirmed negative; hypothesis closed"
+
+sliceeq_saq_implementation:
+  hypothesis: H7.5
+  protocol: "experiments/h7_slice_profile_reacquisition/h7_5_saq_implementation_protocol.md"
+  train_entry: "../code/train_sliceeq_saq.py"
+  test_entry: "../code/test_sliceeq_saq.py"
+  utility: "../code/utils/sliceeq_saq.py"
+  tests: "../tests/test_sliceeq_saq.py and ../tests/test_sliceeq_saq_contract.py"
+  experiment_default: "SliceEqSAQ_PROMISE12"
+  sole_change: "replace 12 IID profile draws per L/U branch with four fixed 2x2 Gauss-Legendre nodes, each assigned three times after independent seeded permutations"
+  nodes: "sigma 0.5345299462/0.7654700538; phase -0.1443375673/+0.1443375673"
+  compute: "unchanged one-view-per-sample and one student forward of 36; no extra network forward or inference cost"
+  frozen_parent_hashes: "train_sliceeq_occ.py f9391d...93e5; test_sliceeq_occ.py 856b23...c5386; utils/sliceeq_occ.py de2fc7...d6080; utils/sliceeq.py 44a956...168f7"
+  source_hashes: "train 6d29f4e222136e51d736414af06852efe0580855fbd95a60b61db22e55f86240; test 372dc0e06c51deeb784ff84819a02c575783557dd69ce2ae89899ad89ed0299e; utility b0ac40a94467ff5ed9398855de06ecda05cc303a287c17ea9dc58a4272f67299"
+  validation: "five new Python sources pass py_compile under temporary official Python 3.11.9; 26 SAQ/SliceEqOcc/SliceEq/H7.3/H7.4 source-contract tests pass; tensor tests are present but require the user's PyTorch/CUDA environment"
+  evidence_class: "exploratory_gate_skipped; completed outcome accepted from the user's qualitative report"
+  result: "no material gain over SliceEqOcc"
+  mechanism_interpretation: "The four nodes preserve mean center weight but truncate IID tails and are distributed across different anatomy samples, so they do not estimate each sample-conditional acquisition risk."
+  status: "implemented and run externally; negative; closed from further optimization"
+
+sliceeq_h7_6_protocol:
+  hypothesis: H7.6
+  protocol: "experiments/h7_slice_profile_reacquisition/h7_6_protocol_conditioned_scan_coherent_protocol.md"
+  candidate: "First isolate scan-coherent profile sampling at the identical marginal distribution; then add spacing-conditioned physical-coordinate weights and native-to-target profile composition only where trustworthy thickness/profile metadata exists."
+  controls: "current IID SliceEqOcc, profile/case shuffle, metadata shuffle, image-only matched profile, fixed mean severity"
+  primary_metric: "predeclared through-plane robustness AUC and method-by-protocol interaction on untouched validation/external data"
+  dependency: "The physical/metadata-conditioned stage still requires trustworthy provenance and later causal evidence. By user priority, one metadata-free H7.6a scan-coherence optimization run is authorized before ablation."
+  status: "H7.6a completed externally and negative at test Dice 0.836219; physical-coordinate V2/V3 remains deferred until trustworthy metadata exists"
+
+sliceeq_occ_sc_implementation:
+  hypothesis: H7.6a
+  protocol: "experiments/h7_slice_profile_reacquisition/h7_6_scan_coherent_implementation_protocol.md"
+  train_entry: "../code/train_sliceeq_occ_sc.py"
+  test_entry: "../code/test_sliceeq_occ_sc.py"
+  utility: "../code/utils/sliceeq_scan.py"
+  tests: "../tests/test_sliceeq_scan.py and ../tests/test_sliceeq_scan_contract.py"
+  documentation: "../docs/SLICEEQ_OCC_SC_README.md"
+  experiment_default: "SliceEqOccSC_PROMISE12"
+  sole_change: "replace per-sample IID L/U profile draws with independently seeded patient-level profile tables; one profile per case per epoch, randomized stratification across cases, continuous refresh across epochs"
+  preserved_marginals: "sigma [0.45,0.85] and phase [-0.25,0.25] in slice units; continuous jitter retains tails; no fixed quadrature nodes"
+  metadata_scope: "case identity only; current H5/list contract has no verified spacing/thickness/protocol field, so this version is not physically calibrated"
+  frozen_parent: "loader batch 24; effective student views 36; 1k warmup; exact-GT L occupancy; detached hard-LCC U occupancy; soft CE+Dice; EMA/SGD/ramp; 30k; fixed root/checkpoint; 2D inference"
+  parent_hashes: "train_occ f9391d...c93e5; test_occ 856b23...c5386; sliceeq 44a956...168f7; occ utility de2fc7...d6080; stack dataset 9cc39c...19d5"
+  source_hashes: "train a6d72655995112b00444e805ade962c913700ef1800461752df391e6dfec0c7f; test d2d9d2d053e4854108489bf90f0dcba17d37abf5dfd34ce4e449084b09ce2389; utility cd905c7af077b2b97a7d1c104cf6cfca489af1f1c1290ed940a9527b6a011fab"
+  validation: "five new sources pass py_compile; all 48 repository source-contract tests pass with two expected data-root skips; parent hashes exact. Tensor tests are supplied but local Python has no torch and must run on the CUDA server."
+  batch_interpretation: "36 is not the loader batch and not mathematically required by fractional occupancy. It is required by the confirmed three-branch objective if the 12 center hard anchors and 12 exact-GT reacquired labeled views are both retained in the same update; sequential forwards could reduce peak memory without deleting either loss."
+  result: "external validation-selected test Dice 0.836219; lower than the accepted SliceEqOcc development result and worse on 9/10 cases"
+  status: "completed externally; negative; synthetic scan-coherent sampler closed"
+
+sliceeq_h7_8_dual_anchor_result:
+  hypothesis: H7.8
+  protocol: "experiments/h7_slice_profile_reacquisition/h7_8_dual_anchor_protocol.md"
+  train_entry: "../code/train_sliceeq_occ_da.py"
+  result: "user-supplied val-best checkpoint test Dice 0.832141; best validation 0.803741 at 20.8k; supplied log ends at 29k with validation 0.786358"
+  mechanism: "The fixed 0.5/0.5 mean halves the retained SliceEqOcc measurement coefficient while native and measurement hard targets differ on only about 0.003% of pixels; the joint 48-view forward also changes student BN composition."
+  status: "completed externally; negative; ratio/ramp rescue closed"
+
+sliceeq_occ_aptna_implementation:
+  hypothesis: H7.9
+  protocol: "experiments/h7_slice_profile_reacquisition/h7_9_ap_tna_protocol.md"
+  train_entry: "../code/train_sliceeq_occ_aptna.py"
+  test_entry: "../code/test_sliceeq_occ_aptna.py"
+  tests: "../tests/test_sliceeq_aptna_contract.py"
+  documentation: "../docs/SLICEEQ_OCC_APTNA_README.md"
+  experiment_default: "SliceEqOccAPTNA_PROMISE12"
+  objective: "L=Lsup+lambda*L_U_measurement+mu*L_U_native, where mu=0.5*lambda*(1-lambda/(5*consistency)); the complete parent measurement coefficient is never attenuated and the native bridge vanishes at maximum ramp"
+  forward_contract: "parent 36-view main forward unchanged; native-U uses a separate 12-view forward with student BN running statistics frozen and CUDA RNG forked/restored; one optimizer and one train-mode EMA update"
+  evaluation_contract: "validation block is an exact source copy of SliceEqOcc: same valloader, val_2d metric, 200-step frequency, mean Dice, strict improvement checkpointing, raw student model, and periodic saves"
+  frozen_parent_hashes: "train_occ f9391d...c93e5; test_occ 856b23...c5386; train_DA 65767d...2672; test_DA f3331f...2ed"
+  source_hashes: "train 7902f83c69f7b5f87069e5f84bb0b6a0fbb41809becdea9b5be38af250f50d17; test 2fddae280e94f580e6e7b369eb363e614d7f39381e0cf5a4373dceb63ee06cc8; contract test 8b3f0317f4d739a74ea9d76ddbbf836bfd9ad231c557efc2d957503f19af54cc"
+  validation: "py_compile passes; all 67 repository source-contract tests pass with two expected data-root skips; Ruff unavailable locally; CUDA tensor/training execution remains external"
+  result_artifact: "experiments/h7_slice_profile_reacquisition/results/sliceeq_occ_aptna_external_run_2026-08-14"
+  result: "complete seed-1337 run; best validation 0.804265 at 28.8k, final validation 0.772908, validation-selected test Dice 0.829420. User separately reports about 0.835 for the penultimate periodic checkpoint; its likely 27k validation is 0.781877 and no checkpoint-specific report was supplied."
+  mechanism: "The parent occupancy coefficient, main 36-view forward, EMA policy, and validation are preserved, so the negative result closes the informationally redundant native-anchor family rather than exposing a DA-style main-batch confound."
+  status: "completed externally; negative; no coefficient/cutoff/ramp rescue"
+
+sliceeq_h7_10_operator_reliability_gate:
+  hypothesis: H7.10
+  protocol: "experiments/h7_slice_profile_reacquisition/h7_10_operator_reliability_gate_protocol.md"
+  scope: "zero-training, labeled-only gate on seven training patients, two fixed case-mixed BN batch schedules, eight draws, and three retained parent SliceEqOcc student checkpoints; official validation/test labels are excluded"
+  candidates: "SCT shares each train-mode teacher dropout realization across the three slices in one stack; ADU measures two-pass Jensen-Shannon disagreement after the existing hard-LCC masks are projected by the same profile"
+  distinction: "operator-space JS is an operational reliability proxy: two stochastic passes that agree on modeled acquisition-derived fractional occupancy retain full weight even when occupancy entropy is high"
+  source_artifact: "experiments/h7_slice_profile_reacquisition/results/h7_10_operator_reliability_gate_2026-08-14.json; SHA-256 b23ca1cf3621569dec3b5256d96046225c9621ad3050061b2f21083f39509670"
+  derived_audit: "experiments/h7_slice_profile_reacquisition/results/h7_10_strict_reaggregation_2026-08-14.json, SHA-256 4fde05653d29fdb082bd9b8bf7a5428c1ef0794cb09924339c58e33e8c111819; generated by ../code/reaggregate_h7_10_result.py SHA-256 f913fbc08a47ce89011efd8c1170c225fb9cb99019033206934dce5695d8de4b"
+  result: "SCT fails at all three checkpoints and 0/7 named patients. ADU passes 7/7, 7/7, and 5/7 patients at 18k/24k/30k; all 84 pairs are quality-complete and the conservative cross-checkpoint audit passes 7/7 named training patients. JS/error rho is 0.61--0.68, top-20 concentration 2.26--2.69, normalized weighted-risk reduction 5.26%--7.34%, and exact fractional weight retention 0.963--0.965."
+  evidence_class: "exploratory-positive mechanism screen: the uploaded analyzer predates final deterministic/support-pooling hardening; raw ADU records permit conservative reaggregation, but paper-level confirmation requires a final-hash rerun"
+  decision: "close the tested elementwise SCT branch and authorize exactly one exploratory SliceEqOcc-ADU full run; no SCT rescue or first-run combination"
+  evaluation_contract: "any authorized run keeps the existing SliceEqOcc validation computation and strict checkpoint rule unchanged"
+  protocol_amendment: "Before implementation, raw occupancy variance was demoted because shared masks can add positive covariance; the SCT mechanism gate now uses acquisition-residual variance. The convex q_bar Brier condition is sanity-only, and all checkpoint evidence is labeled student_as_proxy_teacher."
+  status: "completed; tested SCT negative and exploratory ADU positive; the authorized H7.11 ADU full run later completed neutral/negative"
+
+sliceeq_occ_adu_implementation:
+  hypothesis: H7.11
+  protocol: "experiments/h7_slice_profile_reacquisition/h7_11_adu_implementation_protocol.md"
+  train_entry: "../code/train_sliceeq_occ_adu.py"
+  test_entry: "../code/test_sliceeq_occ_adu.py"
+  utility: "../code/utils/sliceeq_adu.py"
+  tests: "../tests/test_sliceeq_adu.py and ../tests/test_sliceeq_adu_contract.py"
+  documentation: "../docs/SLICEEQ_OCC_ADU_README.md"
+  method: "one bounded package: two hard-LCC teacher occupancies are projected with the same SliceEq profile, averaged as q_bar, and the existing U CE+Dice is weighted by 1-JS/log(2); no case rules, trainable parameters, thresholds, student views, or inference changes"
+  state_isolation: "the primary train-mode EMA forward is unchanged; the second forward restores all persistent EMA buffers and target-device RNG so only the first pass remains visible to the parent path"
+  frozen_recipe: "PROMISE12 root; seed1337; label7; batch24/student36; 30k; EMA0.99; LR0.01; consistency/ramp; radius/sigma/phase; deterministic mode; shared Pre10000 SHA-256 49e8883039a5712102dc17c5277009504b55c232a10a0af1de4d26fbb414b9b9"
+  source_hashes: "train 24cf98c472fe1ed4d6d4e75a53c1408e6e6f5126b402d206743afe82cb5e4e9c; test 4ae306e0ab41a6fa2893be91d1e984db8531eca3b13a61ba95f641b632f18dcb; utility 6d753bd66de34238b18d8162ce227e04d0930c26f02e84238f2c129aea34a086; tensor test a06682584b8a8160f43f7673a0432652d558e2a6c798e23d6d93fec74fee7673; contract test 80c6286d3652e200c7f064528788f59e5e56b93c6af656646cb03f75bb2cddb5"
+  evaluation_contract: "parent validation block is byte-identical; matched parent best validation is 0.817373 from log SHA-256 93fe37c576e0ca575e25f2938086d1842657faf9b9a1647b68672befa2be8442; exploratory pass requires ADU best validation >=0.820373; validation-selected checkpoint is tested once regardless of sign"
+  attribution_contract: "ADU couples q_bar ensembling and JS weighting; if positive, run a compute-matched q_bar-only w=1 control before attributing gain to reliability weighting"
+  local_validation: "syntax and static contracts pass; local Python lacks torch/CUDA, so the external CUDA isolation test must report ok rather than skipped before 30k training"
+  result_artifact: "experiments/h7_slice_profile_reacquisition/results/sliceeq_occ_adu_external_run_2026-08-14"
+  supplied_artifact_hashes: "log b539e8b248dce4d281e9f556f2b0cc90642f08c3ba13082ed6045306842dd0ec; performance 18e80cff53e494c6ad94b96fc0c3fb2211c2483710c1d26fd5e846af6dc76301"
+  result: "Supplied log is incomplete through 27.6k. Best validation is 0.815701@27k, below parent 0.817373 and locked pass 0.820373. The supplied iter20.8k test is Dice 0.843335, Jaccard 0.731099, HD95 4.045004, ASD 2.150427, versus accepted parent-development Dice 0.844566."
+  mechanism: "Operator-space JS is active on only about 0.619% of pixels in 1k--10k and 0.370% in 24k--27.6k; whole-image mean weights are 0.998742 and 0.999280. The screen can rank a tiny stochastic subset but cannot correct shared systematic pseudo errors or materially change optimization."
+  decision: "negative/neutral; close ADU, q_bar-only, JS-temperature, pass-count, threshold, and schedule rescues"
+  status: "completed externally; negative/neutral; closed"
+
+sliceeq_occ_scpo_implementation:
+  hypothesis: H7.12
+  protocol: "experiments/h7_slice_profile_reacquisition/h7_12_scpo_protocol.md"
+  train_entry: "../code/train_sliceeq_occ_scpo.py"
+  test_entry: "../code/test_sliceeq_occ_scpo.py"
+  utility: "../code/utils/sliceeq_scpo.py"
+  tests: "../tests/test_sliceeq_scpo.py and ../tests/test_sliceeq_scpo_contract.py"
+  documentation: "../docs/SLICEEQ_OCC_SCPO_README.md"
+  method: "After the unchanged train-mode EMA hard prediction, reshape each unlabeled pseudo stack to Bx3xHxW, retain exactly one largest 26-connected foreground component over the slab, and pass it through the unchanged paired SliceEq operator."
+  frozen_parent: "model; shared Pre10000 hash; seed and optimizer; one train-mode EMA forward; one 36-view student forward; exact-GT labeled occupancy; continuous profile; full Occ loss/ramp; validation; checkpoint selection; strict 2-D inference"
+  novelty_boundary: "SCPO is not a first 3-D/LCC/inter-slice consistency claim. If positive, it is a secondary source-occupancy construction: a non-invertible through-plane measurement should integrate a coherent latent slab."
+  source_hashes: "protocol d2166c02e5eeda7952a66bf562db02fa1a17cf108abe16668b80bc664c3d767d; train 6f71daa7ac527d66e7c3f92e784c7710bd29d3dcaf15276bdd8d392740d7ba9a; test 5502e3cff1b47c86afad9458241715a4e0cdc18b6caea03ac4267186701b7bc0; utility ceb9a46cc89db1f854db170957abdd362da49707cf66517dca16e3c03c9acc67; tensor test 2c09ad7f2b4b5e6caf9ebbe859f761061c3536ca33328f0fdd6bcc5c7f7531a8; contract test f3adbd304f01e8c458a449f138d16f90e3ce63ea49ef8b1b83c2b19099137803"
+  evaluation_contract: "validation block is byte-identical to SliceEqOcc; matched parent best is 0.817373; exploratory pass requires >=0.820373; test only the validation-selected checkpoint once"
+  local_validation: "all five new Python files pass syntax compilation; SCPO static contracts pass 7/7; the full repository static contract suite passes 92 tests with two expected missing-data skips; local tensor execution is unavailable because torch is absent"
+  result_artifact: "experiments/h7_slice_profile_reacquisition/results/sliceeq_occ_scpo_external_run_2026-08-14"
+  supplied_artifact_hashes: "log 3b4155a10781bf9a5299c55a9d8d4e7414260618f03cc23301663a02a4c3fe03; performance 77dd30e19521da62600830f7d264881b6b1e83a9a2b6c9a0e6b09e55dadf7788"
+  result: "complete 30k seed-1337 run; best validation 0.817824@28.8k, final 0.802209, validation-selected test Dice/Jaccard/HD95/ASD 0.842378/0.729612/4.438169/1.583224. User separately reports about 0.849 for a preceding periodic checkpoint without a supplied checkpoint-specific artifact."
+  mechanism: "postwarmup changed pixels average 0.004527%, foreground mass ratio 0.999904, and active slabs 10.17%; activity falls further late. SCPO is almost always the parent target and cannot reliably alter optimization."
+  decision: "negative/neutral; close connectivity, morphology, slab-width, and component-threshold rescues"
+  status: "completed externally; negative/neutral; closed"
+
+sliceeq_occ_oaac_implementation:
+  hypothesis: H7.13
+  protocol: "experiments/h7_slice_profile_reacquisition/h7_13_oaac_protocol.md"
+  train_entry: "../code/train_sliceeq_occ_oaac.py"
+  test_entry: "../code/test_sliceeq_occ_oaac.py"
+  utility: "../code/utils/sliceeq_oaac.py"
+  tests: "../tests/test_sliceeq_oaac.py and ../tests/test_sliceeq_oaac_contract.py"
+  documentation: "../docs/SLICEEQ_OCC_OAAC_README.md"
+  method: "Apply a per-sample monotonic log-gamma, positive-contrast, and brightness transform after paired SliceEq re-acquisition, only to all 12 post-warmup unlabeled student images; the acquisition-derived occupancy target is unchanged."
+  frozen_parent: "original SliceEqOcc; exact-GT L branches; train-mode EMA hard/LCC teacher; continuous profile and RNG; complete Occ loss/ramp; loader24/student36; one teacher/student forward; optimizer/EMA; validation/checkpoint rule; strict 2-D inference"
+  appearance_contract: "log-gamma [-0.20,0.20], log-contrast [-0.15,0.15], brightness fraction of source span [-0.10,0.10], independent CUDA generator seed1339; no clipping, noise, blur, resize, masking, mixing, Fourier transform, or coordinate change"
+  novelty_boundary: "OAAC is not a first weak-to-strong or intensity-augmentation claim. Its narrow secondary contribution is the ordered composition of target-changing acquisition with occupancy first and target-invariant appearance second."
+  source_hashes: "initial preimplementation protocol 369fa0b9632d93eba5deb2d98c8b4ecce01b28960ada5a10aa62da230cdbbcb8; final pretraining protocol 146fecfa6e02b2f095f319fb03d8c827b25e26e0af6a7431277d7c35480827f8; train a4a12e54808eafb1a63761a7ee323e467f5ba18b98f868d27e7a3d00f1209e43; test 4f7295a870c3529f2deefb6c9f2d1e4f3c6ec556bd3c5f2260a4d2553fe0c428; utility 1cc0fdf5397d0fbb4d754efb2844b4882c4a22d95db7bcba70ddbee8f9b0bc97; tensor test 633fef8b28269046765c553c7270bb72b1e2daa0fd2a4ffebcda9c60aaf74a4b; contract test 1de6227a1abedcaa373635789152616a0d78908028d6aae78a581777ccfe8111"
+  evaluation_contract: "matched parent best validation 0.817373; exploratory pass requires >=0.820373; test the validation-selected best checkpoint once; desired development test >0.849 cannot select an iteration"
+  protocol_deviation: "The user clarified that multiple checkpoints were evaluated on the local 10-case test split and iter27k was retained as the test-Dice maximum. This violates the second-stage selection contract; the exact inspected checkpoint set is unavailable."
+  local_validation: "all five Python sources pass syntax compilation; OAAC contracts pass 8/8 and the SliceEq static contract suite passes 83/83. Local Python lacks torch, so the five tensor tests must execute and pass on the training server; the training entry also runs a mandatory CUDA smoke before 30k."
+  result_artifact: "experiments/h7_slice_profile_reacquisition/results/sliceeq_occ_oaac_external_run_2026-08-14"
+  supplied_artifact_hashes: "log 0825e7f29983730980965582a7eb160379c4e70de23f390a1ab09955d4f8f527; performance 8f4c9687290b7be15a346030204e1d03700f51c9b363ed4928fe54c95842bc23"
+  result: "complete 30k seed1337 run; best validation 0.834863@23.8k, final 0.831964. Iter27k was selected as the test-Dice maximum among multiple inspected checkpoints and reports Dice/Jaccard/HD95/ASD 0.849538/0.740985/3.554760/1.868299; its apparent oracle difference versus SliceEqOcc is +0.004972 and is not an unbiased gain estimate."
+  mechanism: "146/146 appearance diagnostics have active_samples=1.0; mean normalized absolute image change is 0.055178, so the intervention remains high-coverage throughout training."
+  decision: "validation proxy positive; second-stage checkpoint rule violated by test-max selection; freeze model modules and require fresh hidden/external confirmation"
+  status: "completed externally; test-selected development oracle; unbiased confirmation pending"
+
+sliceeq_oaac_h7_14_optimization:
+  hypothesis: H7.14
+  protocol: "experiments/h7_slice_profile_reacquisition/h7_14_trajectory_weight_averaging_protocol.md"
+  literature: "literature/42_oaac_no_architecture_optimization_2026-08-17.md"
+  problem: "The OAAC method is active and positive on validation, but constant-lr raw-student checkpoints oscillate and the supplied 0.849538 is already the test-selected maximum among all inspected checkpoints."
+  stage_a: "Equal-average exactly iter24k/27k/30k raw-student floating weights; recompute BN once on the unchanged training-only OAAC 36-view student distribution with dropout disabled; no alternate window or coefficient."
+  stage_a_gate: "Run unchanged validation first. Test the single averaged checkpoint only if validation Dice is strictly greater than 0.834863. Any resulting test score is development-only."
+  stage_b: "If Stage A is positive, prospectively maintain an equal student-weight average every 200 steps from 22.6k through 30k in matched SliceEqOcc and OAAC runs, then recalibrate BN and use the final average as the frozen readout."
+  fallback: "If sparse trajectory averaging is neutral, do not sweep windows. Run one separate matched PolyLR schedule lr=0.01*(1-t/30000)^0.9 for SliceEqOcc and OAAC, with all method variables fixed and without SWA in the first run."
+  excluded: "additional target modules; profile-range tuning; EMA-decay or teacher-mode rescue; TTA; 3-D postprocessing; checkpoint/soup/test search; best-seed selection"
+  novelty_boundary: "Trajectory averaging and PolyLR are shared optimization recipes, not SliceEq/OAAC contributions. OAAC remains the ordered acquisition-then-appearance method component."
+  status: "deferred by user constraint; learning-rate/readout optimization is not the requested next direction"
+
+sliceeq_oaac_h7_15_parameter_calibration:
+  hypothesis: H7.15
+  protocol: "experiments/h7_slice_profile_reacquisition/h7_15_oaac_parameter_calibration_protocol.md"
+  frozen_baseline: "SGD/lr0.01/momentum/weight decay; EMA0.99 train-mode; consistency/ramp; warmup; shared Pre10000 net+opt; seed1337; batch24/student36; 30k; losses; validation/checkpoint rule; inference"
+  round1: "Reference scale1,p1 is complete. Run Mild-all scale0.75,p1; Current-mix scale1,p0.75; Strong-all scale1.25,p1. Scale multiplies log-gamma, log-contrast, and brightness-span ranges together."
+  round1_rationale: "Current mean normalized change is 0.055178 with 100% activity and no severe late collapse. Mild-all versus Current-mix approximately matches expected aggregate change while separating severity from coverage; Strong-all tests remaining headroom."
+  round2: "After locking the Round-1 winner, test joint profile severity 0.85x (sigma [0.3825,0.7225], phase +/-0.2125) and 1.15x (sigma [0.5175,0.9775], phase +/-0.2875)."
+  selection: "unchanged validation only; replace current OAAC only if best validation >0.834863, with >=0.837863 treated as materially promising; test only the validation-selected checkpoint of one winner"
+  checkpoint_archiving: "the isolated H7.15 successor saves raw student state every 1000 iterations; original SliceEqOcc/OAAC sources remain unchanged; validation stays every 200 and best-model selection is unchanged"
+  excluded: "lr/optimizer/EMA/consistency/ramp/batch/loss/length changes; component-wise range grid; seed selection; test checkpoint search; TTA/postprocessing"
+  result: "Strong-all scale1.25 complete: best validation 0.836475@29.4k, final 0.828680; validation-best test Dice/Jaccard/HD95/ASD 0.851960/0.745347/3.228864/1.307063"
+  status: "positive; validation-selected local winner and final selected method configuration after the negative scale1.50 bracket"
+
+sliceeq_oaac_h7_16_scale150:
+  hypothesis: H7.16
+  protocol: "experiments/h7_slice_profile_reacquisition/h7_16_oaac_scale150_protocol.md"
+  method_change: "joint OAAC scale1.50 only: gamma +/-0.30, contrast +/-0.225, brightness/span +/-0.15, probability1"
+  frozen: "shared pretrain/seed; SliceEq profile; SGD/lr; EMA; ramp; batch; loss; length; validation/best rule; inference; 1000-iteration periodic archive"
+  selection: "replace scale1.25 only if unchanged validation exceeds 0.836475; >=0.839475 is materially positive; test unet_best_model once"
+  stop_rule: "if validation does not exceed 0.836475, retain scale1.25 and do not add intermediate/stronger/component-wise OAAC searches"
+  implementation: "../code/train_sliceeq_occ_oaac_scale150.py; ../code/utils/sliceeq_oaac_scale150.py; ../code/test_sliceeq_occ_oaac_scale150.py"
+  result: "complete: best validation 0.835796@29.4k, final 0.831386; validation-best test Dice/Jaccard/HD95/ASD 0.852059/0.745145/3.294424/1.553528; 2/10 wins vs scale1.25"
+  decision: "fails validation replacement by 0.000679; test +0.000099 is neutral and secondary metrics worsen; retain scale1.25"
+  status: "completed negative/neutral; OAAC severity tuning closed"
+
+mmwhs_mri_external_validation:
+  dataset: "MM-WHS 2017 (Multi-Modality Whole Heart Segmentation), MRI subset"
+  official_source: "https://zmiclab.github.io/zxh/0/mmwhs/"
+  role: "prospective external validation of cross-organ, multi-class and multi-center generalization; not a new tuning set"
+  official_inventory: "60 3-D cardiac MRI volumes total; 20 labeled training volumes and 40 official test volumes; seven foreground heart structures"
+  proposed_split: "from the 20 labeled MRI training volumes, lock 4 validation cases; use 4 labeled training cases and hide labels for 12 unlabeled training cases"
+  primary_methods: "supervised-only; BCP-derived EMA; SliceEqOcc; generic photometric strong control; SliceEqOcc-OAAC-Strong; final SliceEqOcc-OAAC-Strong-MPD"
+  frozen_method: "SliceEq profile sigma0.45--0.85 and phase +/-0.25; OAAC Strong log-gamma +/-0.25, log-contrast +/-0.1875, brightness/span +/-0.125, probability1"
+  minimum_repeats: "one fixed optimization seed1337 for every matched method; no multi-seed validation and no seed selection"
+  selection_rule: "no OAAC/profile retuning on MM-WHS; use one common validation/checkpoint rule for all methods and submit to the official hidden test only after selection is locked"
+  metrics: "macro and per-structure Dice; Jaccard; NSD; physical HD95/ASD using real spacing; patient-level paired statistics"
+  status: "planned; data preparation, exact split manifest and execution pending"
+
+sliceeq_h7_17_profile_deepening:
+  hypothesis: H7.17
+  protocol: "experiments/h7_slice_profile_reacquisition/h7_17_self_calibrated_relative_profile_protocol.md"
+  literature: "literature/43_slice_profile_deepening_survey_2026-08-18.md"
+  corrected_parent_definition: "Production SliceEq samples per-sample Gaussian profiles with sigma0.45--0.85 and phase +/-0.25; fixed [0.2,0.6,0.2] is only the representative phi0 sigma~0.6746 profile."
+  selected_candidate: "Self-Calibrated Relative Profile SliceEqOcc (SCRP): estimate a native case/protocol blur proxy from training-only raw MRI, compose only a physically legal additional degradation, discretize it by three slice-bin integrals, and apply identical weights to image and fractional occupancy."
+  frozen: "final SliceEqOccOAACStrong network; shared pretrain; seed1337; optimizer/lr; EMA train-mode; pseudo-label/LCC; losses/ramp; batch24/student36; OAAC scale1.25; 30k; validation/best rule; 1000-step archives; test and single-slice inference"
+  rejected: "validation-selected global ratio; unconstrained attention/MLP weights; pixelwise weights; nonlinear image-only fusion; independent sigma/phase sweep"
+  data_gate: "raw NIfTI/DICOM and reliable slice axis are required; processed H5 alone is insufficient for a physical calibration claim"
+  estimator_gate: "synthetic center-weight MAE <=0.03 or relative width error <=10%; within-case CV <=15%; no more than10% boundary-hitting estimates"
+  support_gate: "three-tap pre-truncation mass >=95%; at least90% eligible cases nonidentity; center weights remain inside parent support about0.485--0.855"
+  exploratory_pass: "unchanged validation best >=0.839475 versus final parent0.836475, not single-patient driven; one validation-selected development test; frozen external MM-WHS is primary generalization evidence"
+  novelty_boundary: "not first MRI slice-profile estimation, acquisition-conditioned segmentation, cross-slice fusion or learned augmentation; contribution is native-aware relative re-acquisition paired with exact/pseudo fractional occupancy in SSL without inference changes"
+  status: "closed without implementation; user cannot obtain original NIfTI/DICOM and the mandatory physical-provenance gate fails"
+
+sliceeq_h7_18_h5_axial_response_profile:
+  hypothesis: H7.18
+  protocol: "experiments/h7_slice_profile_reacquisition/h7_18_axial_response_calibrated_profile_protocol.md"
+  literature: "literature/44_h5_only_axial_response_profile_2026-08-18.md"
+  motivation: "The same random three-tap profile produces anatomy-dependent actual residual magnitude. H5 cannot recover physical PSF but can measure this operator response exactly."
+  method: "Axial-Response Calibrated Profile (ARCP): compute first/second axial response Gram matrices from training images, aggregate a patient-balanced reference, and rescale each sampled parent profile along the identity ray so its normalized response matches the reference subject to the parent's center-weight support."
+  exact_identity: "A_w(X)-x0=(w_plus-w_minus)*(x_plus-x_minus)/2 + (w_minus+w_plus)*(x_minus-2*x0+x_plus)/2"
+  data_firewall: "C_ref and runtime alpha use image stacks only; no U label, pseudo target, logits, loss, iteration, validation, test or acquisition metadata"
+  frozen: "SliceEqOccOAACStrong network/pretrain/seed; parent sigma/phase sampler; optimizer/lr; EMA; teacher/LCC; loss/ramp; batch; OAAC; length; validation/best rule; archives; test/inference"
+  gate: ">=50% active nonclamped stacks; <=25% hits per bound; >=20% patient-balanced residual-CV reduction; >=90% exact fractional-support retention; no >10% first/last-third occupancy-residual loss; mean center-weight shift <0.03"
+  exploratory_pass: "unchanged validation >=0.839475 versus parent0.836475; then one val-selected development test and frozen MM-WHS transfer"
+  controls_if_positive: "parent; shuffled-alpha marginal match; global-mean-alpha; marginal-matched bin-integrated profile"
+  novelty_boundary: "H5-observed operator-effect calibration, not scanner PSF/thickness recovery, first adaptive mixup, learned augmentation or cross-slice attention"
+  implementation: "../code/utils/sliceeq_arcp.py; ../code/analyze_sliceeq_arcp_gate.py; ../code/train_sliceeq_occ_oaac_strong_arcp.py; ../code/test_sliceeq_occ_oaac_strong_arcp.py"
+  tests: "../tests/test_sliceeq_arcp.py; ../tests/test_sliceeq_arcp_contract.py"
+  documentation: "../docs/SLICEEQ_OCC_OAAC_STRONG_ARCP_README.md"
+  source_hashes: "utility 7a92a03dd80c5aedafa8ca619aa4f3025e1417ce585e074bf3d843abf86bdae8; analyzer c1b3ff42af95038adf9d0c7ddd48fc10c5aba63f836754f580a5ecb269133211; train 1c7e3dc0ce59e3e5f1e8bd170a56b77cf62d9fd3250389759803036b3f33b0c9; test edac1ab31d224faca081ac54cbf5ad8fcddcd0fd2fceac960e0ea33c51b5a73a; tensor-test 219f3e8fcd4882b81508d9e7fc14c5ade29953a2ddcc449876aab49aa5eb2877; contract-test 8ceab8e503e5bed88a9bc4ac15429d205fadfca02d685e66090a08b9b16cff64"
+  local_validation: "all new Python sources compile and eight static contracts pass; tensor tests cannot run locally because NumPy/PyTorch are absent"
+  result_artifact: "experiments/h7_slice_profile_reacquisition/results/sliceeq_occ_oaac_strong_arcp_external_run_2026-08-18"
+  supplied_artifact_hashes: "log a5e99b3ad2beff2e0ae0c8d74b01891949c429bcb1c33caf4f2b561aa3717b90; performance b58cdb9f3be7d2960bed1c73e9e6ed6d6e731e2f90fa225cc1f6d4f4e04fce43"
+  result: "complete seed1337 30k run; best validation0.838425@29.8k, final0.830195, validation-selected test Dice/Jaccard/HD95/ASD 0.851062/0.743164/6.217004/2.123881"
+  mechanism: "ARCP is nontrivial (69.46% active, mean |alpha-1|0.132262, center shift0.014669) but reduces logged batch-level reference mismatch by only about5.95%; 54.79% of records move closer to reference"
+  decision: "neutral/negative: +0.001950 validation versus Strong but -0.001050 below locked pass line and -0.000898 test Dice versus Strong; no alpha/epsilon/reference/support/grid rescue"
+  status: "completed externally; neutral/negative; closed; final method remains SliceEqOcc-OAAC-Strong"
+
+sliceeq_h7_19_robust_moment_profile_gate:
+  hypothesis: H7.19
+  protocol: "experiments/h7_slice_profile_reacquisition/h7_19_robust_moment_profile_gate_protocol.md"
+  literature: "literature/45_post_arcp_profile_module_search_2026-08-18.md"
+  problem: "The parent Gaussian sampler couples neighbor mass b and directional phase r and does not explicitly balance retained fractional information across labeled patients and axial index strata. ARCP showed that per-stack image-response normalization is not a valid substitute."
+  candidate: "Design one global phase-symmetric distribution q over a locked21x21 midpoint grid of the parent sigma/phase domain. Maximize worst patient/index-third exact retained fractional information, then choose the closest-to-parent feasible q by KL."
+  data_firewall: "only first191 labeled-training H5 image/label stacks; no unlabeled label, model/checkpoint/logit/confidence/loss, validation or test access"
+  frozen_if_authorized: "three-slice support; identical convex image/occupancy operator; final Strong network/pretrain/seed; SGD/lr; EMA train-mode; teacher/LCC; loss/ramp; loader24/student36; OAAC1.25; 30k; validation/best rule;1000-step archive; test/inference"
+  constraints: "phase mirror; parent E[b], E[b^2], E[(br)^2] within2%; every patient-stratum image residual within5%; q/p0<=3; entropy>=0.70 parent entropy"
+  gate: "seven leave-one-patient-out designs; >=5/7 patients and overall median show >=10% held-out worst-index-third RFI gain; JS to full design median<0.05/max<0.10; hard-target change <=+1pp; nonclamped direction guard; all191 slices required"
+  original_training_authorization: "none before the LOPO gate. If positive, exactly one isolated successor with frozen q_all could run; unchanged validation target was>=0.839475 versus parent0.836475."
+  protocol_deviation: "On 2026-08-18 the user explicitly requested no preliminary test/gate and direct complete training. The original gate remains recorded but is skipped. The direct run is permanently labeled exploratory_user_override_without_lopo_gate."
+  direct_execution: "At process startup read exactly first191 labeled-training image/label H5, compute all7-patient q_all on the fixed21x21 grid, require the locked mathematical constraints and solver convergence, atomically save mpd_profile_design.json, then immediately run unchanged OAAC-Strong Self30000."
+  implementation: "../code/utils/sliceeq_mpd.py; ../code/train_sliceeq_occ_oaac_strong_mpd.py; ../code/test_sliceeq_occ_oaac_strong_mpd.py"
+  tests: "../tests/test_sliceeq_mpd.py; ../tests/test_sliceeq_mpd_contract.py"
+  documentation: "../docs/SLICEEQ_OCC_OAAC_STRONG_MPD_README.md"
+  empty_stratum_policy: "A patient/index-third with zero exact axial-transition opportunity is excluded only from the max-min RFI objective because its denominator is undefined; it remains in image-residual constraints and artifact reporting, and every patient must retain at least one active RFI stratum."
+  source_hashes: "utility 9b215cefe8f22172c2811af63365c2cb21e40daba4f01f4ceae0d5cabf44c817; train 9255640e81259309350f10f80e8a1319ae2a3deaf5a1164292c5baa9292c8f5f; test c93d61f7c2def845bb88ac8574127881bcaa16a80c7155d0dcd7f711e816a393; tensor-test bcfebebbc429d0b203467db82353802af83cff700dfc0fda983c31da123ade62; contract-test be6aa2a711d3e998e7d8ac6af262220acda470436b97df922cff7b39bdbb9d36; README 85eb30452642473b44a4e345819eb89472faefb79acb0940fc57ff79bb9c232b; protocol f99f5983b28b46b78652f1bfcbef35c83450d56351012af9ae0da884a24a138d"
+  local_validation: "new Python sources compile; MPD+Strong static contracts pass11/11 after empty-opportunity handling; local Python lacks NumPy/PyTorch so numerical optimizer/tensor tests are deferred to the training host"
+  rejected_neighbors: "bin-integrated3-tap; radius2/5-tap; finite-support semigroup; D-optimal/SAQ rescue; CVaR/adversarial profile; edge-aware/bilateral; learned nonlinear/attention fusion"
+  novelty_boundary: "not first MixUp, DRO, optimal or learned augmentation, and not scanner-PSF recovery. Narrow claim: training-only moment-constrained robust design of a paired through-plane image-occupancy profile distribution."
+  result_artifact: "experiments/h7_slice_profile_reacquisition/results/sliceeq_occ_oaac_strong_mpd_external_run_2026-08-19"
+  supplied_artifact_hashes: "log 6742f82e18932932418e1093d22bd8b7656f83810af2154d1126ae69cf52c466; corrected performance 49db4ebce06faa8ca1b1e3dbad1732b0f0de2ad3d9168281e38ebe4512f6e97c; superseded wrong performance 52ae817d792f4e201663fe7c3aca830d80954f02b93e2fd6543a2825b4983077"
+  design_result: "distribution sha1ab2de7d...; 20/21 active RFI strata; entropy retention98.83%; max density ratio1.607772; exact phase mirror; worst RFI0.47033756"
+  result: "complete30k seed1337 run; best validation0.836008@25.8k, final0.827233; corrected checkpoint-specific iter29k development test Dice/Jaccard/HD95/ASD0.854573/0.749330/3.256519/1.324697; iter29k validation0.828270"
+  comparison: "versus final Strong: validation best -0.000467; corrected iter29k test Dice +0.002613; Jaccard +0.003983; HD95 +0.027655 worse; ASD +0.017634 worse. Late27k--30k validation is more stable (mean/SD0.826990/0.003777 vs Strong0.821553/0.012075), but the test-positive checkpoint is not validation-selected."
+  mechanism: "nontrivial global q and active fractional occupancy, but RFI optimizes soft exact-GT boundary entropy rather than learnability or U pseudo reliability; hard semantics almost never change"
+  decision: "user-defined highest-tested-checkpoint criterion selects MPD iter29000 at Dice0.854573 as the final method; freeze q and all training parameters; no further PROMISE12 tuning"
+  status: "completed externally; positive and selected final method under explicit user evaluation policy"
+
+sliceeq_h7_20_patient_axial_acquisition_risk_sampling:
+  hypothesis: H7.20
+  protocol: "experiments/h7_slice_profile_reacquisition/h7_20_patient_axial_acquisition_risk_protocol.md"
+  literature: "literature/48_h7_20_pars_novelty_boundary_2026-08-19.md"
+  problem: "The frozen parent samples slice indices within L/U streams, so patient probability scales with volume length and the data-support risk can counteract MPD's patient/index-third robust operator design."
+  candidate: "PARS preserves the exact parent sampler for iterations0--999. Thereafter each stream cycles patients uniformly, samples one global axial index-third distribution designed from exact-L MPD fractional-information opportunity, and samples uniformly within the selected patient-third."
+  design: "two-stage SLSQP: maximize worst active normalized patient-third exposure, then minimize KL to the parent axial law while retaining99% optimum; q/p<=1.50; entropy>=0.90 parent; exactly3 index thirds"
+  data_firewall: "only train_slices names for runtime manifest and first191 labeled-training exact statistics inherited from MPD; U labels/model predictions/loss/confidence/uncertainty/validation/test are excluded"
+  frozen: "final MPD profile distribution; OAAC1.25; network/shared pretrain/seed1337; SGD/LR; EMA train-mode; teacher/LCC; losses/ramp;12L+12U/student36;30k; validation/best;1000-step archives; strict2D inference"
+  warmup_isolation: "iterations0--999 instantiate and consume the original frozen TwoStreamBatchSampler; PARS activates only with the first acquisition-active iteration"
+  runtime: "patient-balanced cyclic permutation in each L/U stream; private NumPy Generator seed1341; frozen global three-bin q; no patient-specific or online adaptive weight"
+  implementation: "../code/utils/sliceeq_pars.py; ../code/train_sliceeq_occ_oaac_strong_mpd_pars.py; ../code/test_sliceeq_occ_oaac_strong_mpd_pars.py"
+  tests: "../tests/test_sliceeq_pars.py; ../tests/test_sliceeq_pars_contract.py"
+  documentation: "../docs/SLICEEQ_OCC_OAAC_STRONG_MPD_PARS_README.md"
+  source_hashes: "utility 24c9c020027fbe5f05879d9de6e79e3f4efe3f86f9fc1146ea0ce872883580e1; train 5d9639bad6fe79ba44947082f64f83cca1c287c925fbf7b161d9cc3937555065; test fd880dd296eda8d6dfb2cac0d3cc0462cf8970be63536f40e63ee7314b6d59e9; tensor-test 3c2ad2f286f405576b1f3179f2ff58bfd75c3d4eb60f74824ca4e61e79556efa; contract-test 6872ae99b7101747f2ff23eab95db0fa5bb79b839da309de57854f670fa4efed; README 4d896bc77a3a52e51123d0f8bad53bcd9a4266ac295b6c88f43ec998482a9c8f; protocol 5247f4a11bb9c782925bfc6b88626a533983ed85f0c4bd8648c9bc51e79e4f14; novelty 0102934d95fb3485f64661b8c7ab523600a57aa47dd50a749ba731911b179d99"
+  local_validation: "all sources compile;6/6 static contracts pass under local Python3.14;4/4 numerical sampler/optimizer tests plus6/6 contracts pass under an existing Python3.12 NumPy2.5/SciPy1.18/Torch2.5 CPU environment; CUDA startup smoke remains required on training host"
+  novelty_boundary: "not first stratified, hierarchical, patient-balanced, axial-slice or hard-example sampling. Narrow claim: fixed patient-balanced axial support law designed from exact acquisition-derived fractional occupancy for a paired through-plane image-target operator."
+  stop_rule: "one direct seed1337 run only; if highest tested checkpoint does not exceed frozen MPD0.854573, close PARS without changing thirds, q constraints, opportunity formula or sampler seed"
+  status: "implemented; local static/numerical tests pass; external CUDA smoke and30k run pending"
+
+bmer_implementation:
+  protocol: "experiments/h5_boundary_evidence_resynthesis/implementation_protocol.md"
+  status: "ARCHIVED; USER DECLINED CORRECTION; NO FURTHER BMER ACTION"
+  scope: "BMER parallel input-only training/test entries remain archived and unchanged; CoDA was later amended only for shared-checkpoint initialization"
+  defaults: "radius=8; sectors=16; position_bins=3; probability=0.5; strength=[0.5,1.0]; min_foreground=32; bank_batch=24"
+  identified_confound: "unaugmented donor sectors are aligned by absolute image angle to recipient sectors after random rotation/flip"
+  final_allowed_action: "none; retain code and negative artifacts only for provenance"
+
+review:
+  path: "reviews/bmer_semantic_review.md"
+  type: "manual six-dimension semantic review; not an ARA Seal"
+  outcome: "Provisional Accept as a research plan; authorize Stage-A only"
+  major_risks: "unverified mechanism; GT-contour leakage; teacher-mask measurement bias"
+
+workspace:
+  findings: "findings.md"
+  log: "research-log.md"
+  literature_dir: "literature/"
+  experiments_dir: "experiments/"
+  to_human_dir: "to_human/"
+  paper_dir: "paper/"

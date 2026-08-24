@@ -1,0 +1,262 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="920" viewBox="0 0 1600 920">
+  <defs>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#2E3440" flood-opacity="0.12"/>
+    </filter>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#4B5563"/>
+    </marker>
+    <marker id="arrowBlue" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#4A90D9"/>
+    </marker>
+    <marker id="arrowTeal" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#2A9D8F"/>
+    </marker>
+    <marker id="arrowOrange" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#E76F51"/>
+    </marker>
+    <style>
+      .title { font: 700 28px Arial, sans-serif; fill: #25313C; }
+      .subtitle { font: 400 15px Arial, sans-serif; fill: #667085; }
+      .panel { font: 700 17px Arial, sans-serif; fill: #25313C; }
+      .lane { font: 700 18px Arial, sans-serif; fill: #25313C; }
+      .boxTitle { font: 700 15px Arial, sans-serif; fill: #25313C; }
+      .body { font: 400 13px Arial, sans-serif; fill: #475467; }
+      .small { font: 400 11.5px Arial, sans-serif; fill: #667085; }
+      .tiny { font: 400 10.5px Arial, sans-serif; fill: #667085; }
+      .math { font: italic 14px Georgia, serif; fill: #25313C; }
+      .badge { font: 700 11px Arial, sans-serif; fill: #FFFFFF; letter-spacing: .4px; }
+      .arrowLabel { font: 600 11px Arial, sans-serif; fill: #667085; }
+      .flow { fill: none; stroke: #4B5563; stroke-width: 2; marker-end: url(#arrow); }
+      .flowBlue { fill: none; stroke: #4A90D9; stroke-width: 2.2; marker-end: url(#arrowBlue); }
+      .flowTeal { fill: none; stroke: #2A9D8F; stroke-width: 2.2; marker-end: url(#arrowTeal); }
+      .flowOrange { fill: none; stroke: #E76F51; stroke-width: 2.2; marker-end: url(#arrowOrange); }
+      .targetDash { fill: none; stroke: #2A9D8F; stroke-width: 2; stroke-dasharray: 7 5; marker-end: url(#arrowTeal); }
+      .dash { fill: none; stroke: #7B8794; stroke-width: 1.8; stroke-dasharray: 7 6; marker-end: url(#arrow); }
+    </style>
+  </defs>
+
+  <rect width="1600" height="920" fill="#FFFFFF"/>
+  <text x="36" y="38" class="title">SliceEqOcc-OAAC: Acquisition-aligned fractional occupancy with ordered appearance consistency</text>
+  <text x="36" y="63" class="subtitle">Training uses neighboring slices and acquisition-aware targets; inference remains an unchanged single-slice 2D U-Net.</text>
+
+  <!-- Training region -->
+  <rect x="28" y="88" width="1544" height="676" rx="18" fill="#FAFBFC" stroke="#D7DEE7" stroke-width="1.5"/>
+  <rect x="28" y="88" width="9" height="676" rx="4" fill="#4A90D9"/>
+  <text x="52" y="116" class="panel">TRAINING ONLY</text>
+
+  <!-- Legend -->
+  <rect x="1010" y="100" width="12" height="12" rx="2" fill="#DCEAF7" stroke="#4A90D9"/>
+  <text x="1029" y="111" class="small">native data / semantic anchor</text>
+  <rect x="1212" y="100" width="12" height="12" rx="2" fill="#DDF2EC" stroke="#2A9D8F"/>
+  <text x="1231" y="111" class="small">paired acquisition / occupancy</text>
+  <rect x="1422" y="100" width="12" height="12" rx="2" fill="#FBE5DD" stroke="#E76F51"/>
+  <text x="1441" y="111" class="small">OAAC strong view</text>
+
+  <!-- Lane backgrounds -->
+  <rect x="49" y="136" width="1030" height="270" rx="14" fill="#F6F9FC" stroke="#DCE6F0"/>
+  <rect x="49" y="424" width="1030" height="309" rx="14" fill="#F6FBF9" stroke="#D8ECE5"/>
+  <text x="68" y="163" class="lane">(a) Labeled branch — exact acquisition supervision</text>
+  <text x="68" y="451" class="lane">(b) Unlabeled branch — pseudo occupancy + ordered appearance</text>
+
+  <!-- Labeled image stack icon -->
+  <g filter="url(#shadow)">
+    <rect x="72" y="192" width="122" height="118" rx="10" fill="#FFFFFF" stroke="#AFC8DF"/>
+    <rect x="90" y="178" width="122" height="118" rx="10" fill="#FFFFFF" stroke="#91B5D5"/>
+    <rect x="108" y="164" width="122" height="118" rx="10" fill="#EAF2F8" stroke="#4A90D9" stroke-width="1.7"/>
+    <ellipse cx="169" cy="223" rx="34" ry="24" fill="#A8B9C8"/>
+    <ellipse cx="169" cy="223" rx="18" ry="12" fill="#647A8C"/>
+  </g>
+  <text x="151" y="328" text-anchor="middle" class="boxTitle">3-slice MRI stack</text>
+  <text x="151" y="347" text-anchor="middle" class="math">X<tspan baseline-shift="sub" font-size="10">z</tspan><tspan font-style="normal"> = {x</tspan><tspan baseline-shift="sub" font-size="10">z−1</tspan><tspan font-style="normal">, x</tspan><tspan baseline-shift="sub" font-size="10">z</tspan><tspan font-style="normal">, x</tspan><tspan baseline-shift="sub" font-size="10">z+1</tspan><tspan font-style="normal">}</tspan></text>
+
+  <!-- Labeled GT stack icon -->
+  <g filter="url(#shadow)">
+    <rect x="259" y="192" width="100" height="94" rx="9" fill="#FFFFFF" stroke="#AFC8DF"/>
+    <rect x="273" y="179" width="100" height="94" rx="9" fill="#FFFFFF" stroke="#91B5D5"/>
+    <rect x="287" y="166" width="100" height="94" rx="9" fill="#EAF2F8" stroke="#4A90D9" stroke-width="1.7"/>
+    <path d="M319 226 C308 205, 323 186, 347 187 C371 188, 379 207, 367 226 C356 244, 331 245, 319 226 Z" fill="#4A90D9" opacity="0.8"/>
+  </g>
+  <text x="323" y="328" text-anchor="middle" class="boxTitle">Exact GT stack</text>
+  <text x="323" y="347" text-anchor="middle" class="math">Y<tspan baseline-shift="sub" font-size="10">z</tspan><tspan font-style="normal"> (one-hot)</tspan></text>
+
+  <!-- Paired A_h operator labeled -->
+  <g filter="url(#shadow)">
+    <rect x="432" y="180" width="185" height="150" rx="13" fill="#FFF8E7" stroke="#D4A252" stroke-width="1.8"/>
+  </g>
+  <rect x="447" y="194" width="62" height="20" rx="10" fill="#D4A252"/>
+  <text x="478" y="208" text-anchor="middle" class="badge">PAIRED</text>
+  <text x="524" y="239" text-anchor="middle" class="boxTitle">Slice profile operator</text>
+  <text x="524" y="264" text-anchor="middle" class="math">A<tspan baseline-shift="sub" font-size="10">h</tspan><tspan font-style="normal">(·) = Σ</tspan><tspan baseline-shift="sub" font-size="10">k</tspan><tspan font-style="normal"> w</tspan><tspan baseline-shift="sub" font-size="10">k</tspan><tspan font-style="normal">(·)</tspan></text>
+  <text x="524" y="287" text-anchor="middle" class="small">σ ∼ U(0.45, 0.85)</text>
+  <text x="524" y="306" text-anchor="middle" class="small">φ ∼ U(−0.25, 0.25)</text>
+
+  <!-- L outputs -->
+  <g filter="url(#shadow)">
+    <rect x="675" y="164" width="176" height="92" rx="11" fill="#DDF2EC" stroke="#2A9D8F" stroke-width="1.6"/>
+    <rect x="675" y="274" width="176" height="92" rx="11" fill="#DDF2EC" stroke="#2A9D8F" stroke-width="1.6"/>
+  </g>
+  <text x="763" y="190" text-anchor="middle" class="boxTitle">Re-acquired image</text>
+  <text x="763" y="219" text-anchor="middle" class="math">x̃<tspan baseline-shift="sub" font-size="10">L</tspan><tspan font-style="normal"> = A</tspan><tspan baseline-shift="sub" font-size="10">h</tspan><tspan font-style="normal">(X</tspan><tspan baseline-shift="sub" font-size="10">z</tspan><tspan font-style="normal">)</tspan></text>
+  <text x="763" y="241" text-anchor="middle" class="small">target-changing view</text>
+  <text x="763" y="300" text-anchor="middle" class="boxTitle">Fractional occupancy</text>
+  <text x="763" y="329" text-anchor="middle" class="math">q<tspan baseline-shift="sub" font-size="10">L</tspan><tspan font-style="normal"> = A</tspan><tspan baseline-shift="sub" font-size="10">h</tspan><tspan font-style="normal">(onehot(Y</tspan><tspan baseline-shift="sub" font-size="10">z</tspan><tspan font-style="normal">))</tspan></text>
+  <text x="763" y="351" text-anchor="middle" class="small">soft CE + squared soft Dice</text>
+
+  <!-- L native anchor -->
+  <rect x="881" y="173" width="170" height="78" rx="10" fill="#EAF2F8" stroke="#4A90D9"/>
+  <text x="966" y="199" text-anchor="middle" class="boxTitle">Native center anchor</text>
+  <text x="966" y="223" text-anchor="middle" class="math">(x<tspan baseline-shift="sub" font-size="10">z</tspan><tspan font-style="normal">, y</tspan><tspan baseline-shift="sub" font-size="10">z</tspan><tspan font-style="normal">)</tspan></text>
+  <text x="966" y="241" text-anchor="middle" class="small">hard CE + Dice</text>
+
+  <!-- L arrows -->
+  <path d="M230 221 C315 221, 355 221, 429 235" class="flowBlue"/>
+  <path d="M387 216 C405 216, 413 216, 429 236" class="flowBlue"/>
+  <text x="402" y="201" class="arrowLabel">same w</text>
+  <path d="M618 220 L672 210" class="flowTeal"/>
+  <path d="M618 285 L672 316" class="flowTeal"/>
+  <path d="M230 185 C420 136, 750 137, 878 191" class="flowBlue"/>
+  <text x="473" y="148" class="arrowLabel">center slice bypass</text>
+
+  <!-- U image stack -->
+  <g filter="url(#shadow)">
+    <rect x="72" y="510" width="122" height="118" rx="10" fill="#FFFFFF" stroke="#AFC8DF"/>
+    <rect x="90" y="496" width="122" height="118" rx="10" fill="#FFFFFF" stroke="#91B5D5"/>
+    <rect x="108" y="482" width="122" height="118" rx="10" fill="#EAF2F8" stroke="#4A90D9" stroke-width="1.7"/>
+    <ellipse cx="169" cy="541" rx="35" ry="25" fill="#A8B9C8"/>
+    <ellipse cx="169" cy="541" rx="19" ry="13" fill="#647A8C"/>
+  </g>
+  <text x="151" y="646" text-anchor="middle" class="boxTitle">Unlabeled MRI stack</text>
+  <text x="151" y="665" text-anchor="middle" class="math">X<tspan baseline-shift="sub" font-size="10">z</tspan><tspan font-style="normal">U</tspan></text>
+
+  <!-- EMA Teacher -->
+  <g filter="url(#shadow)">
+    <rect x="273" y="483" width="156" height="118" rx="12" fill="#EEF0F5" stroke="#7B8794" stroke-width="1.5"/>
+  </g>
+  <text x="351" y="511" text-anchor="middle" class="boxTitle">EMA teacher</text>
+  <text x="351" y="536" text-anchor="middle" class="body">2D U-Net × 3 slices</text>
+  <text x="351" y="559" text-anchor="middle" class="body">hard argmax</text>
+  <text x="351" y="580" text-anchor="middle" class="body">slice-wise 2D LCC</text>
+  <text x="351" y="620" text-anchor="middle" class="small">no gradient</text>
+
+  <!-- Pseudo stack -->
+  <g filter="url(#shadow)">
+    <rect x="477" y="497" width="126" height="92" rx="10" fill="#FFFFFF" stroke="#7B8794"/>
+    <rect x="489" y="486" width="126" height="92" rx="10" fill="#FFFFFF" stroke="#7B8794"/>
+    <rect x="501" y="475" width="126" height="92" rx="10" fill="#EEF0F5" stroke="#7B8794" stroke-width="1.5"/>
+    <path d="M533 541 C522 519, 537 496, 561 498 C584 499, 594 519, 582 539 C571 558, 545 559, 533 541 Z" fill="#7B8794" opacity="0.8"/>
+  </g>
+  <text x="552" y="616" text-anchor="middle" class="boxTitle">Pseudo-mask stack</text>
+  <text x="552" y="636" text-anchor="middle" class="math">Ŷ<tspan baseline-shift="sub" font-size="10">z</tspan><tspan font-style="normal">U</tspan></text>
+
+  <!-- U paired operator -->
+  <g filter="url(#shadow)">
+    <rect x="665" y="478" width="150" height="127" rx="12" fill="#FFF8E7" stroke="#D4A252" stroke-width="1.8"/>
+  </g>
+  <rect x="681" y="491" width="62" height="20" rx="10" fill="#D4A252"/>
+  <text x="712" y="505" text-anchor="middle" class="badge">SAME w</text>
+  <text x="740" y="537" text-anchor="middle" class="boxTitle">Paired A<tspan baseline-shift="sub" font-size="10">h</tspan></text>
+  <text x="740" y="562" text-anchor="middle" class="body">image + pseudo mask</text>
+  <text x="740" y="584" text-anchor="middle" class="small">one stochastic profile</text>
+
+  <!-- U reacquired image and q -->
+  <rect x="851" y="463" width="168" height="82" rx="10" fill="#DDF2EC" stroke="#2A9D8F" stroke-width="1.6"/>
+  <rect x="851" y="620" width="168" height="82" rx="10" fill="#DDF2EC" stroke="#2A9D8F" stroke-width="1.6"/>
+  <text x="935" y="488" text-anchor="middle" class="boxTitle">Re-acquired U image</text>
+  <text x="935" y="516" text-anchor="middle" class="math">x̃<tspan baseline-shift="sub" font-size="10">U</tspan><tspan font-style="normal"> = A</tspan><tspan baseline-shift="sub" font-size="10">h</tspan><tspan font-style="normal">(X</tspan><tspan baseline-shift="sub" font-size="10">z</tspan><tspan font-style="normal">U)</tspan></text>
+  <text x="935" y="644" text-anchor="middle" class="boxTitle">Pseudo occupancy target</text>
+  <text x="935" y="673" text-anchor="middle" class="math">q<tspan baseline-shift="sub" font-size="10">U</tspan><tspan font-style="normal"> = A</tspan><tspan baseline-shift="sub" font-size="10">h</tspan><tspan font-style="normal">(onehot(Ŷ</tspan><tspan baseline-shift="sub" font-size="10">z</tspan><tspan font-style="normal">U))</tspan></text>
+  <text x="935" y="692" text-anchor="middle" class="small">unchanged by OAAC</text>
+
+  <!-- U arrows -->
+  <path d="M230 540 L270 540" class="flowBlue"/>
+  <path d="M429 540 L474 540" class="flow"/>
+  <path d="M627 529 L662 529" class="flow"/>
+  <path d="M230 572 C390 688, 535 650, 662 570" class="flowBlue"/>
+  <text x="431" y="683" class="arrowLabel">same transformed stack</text>
+  <path d="M816 510 L848 504" class="flowTeal"/>
+  <path d="M816 574 C830 610, 833 649, 848 658" class="flowTeal"/>
+
+  <!-- OAAC block -->
+  <g filter="url(#shadow)">
+    <rect x="1096" y="443" width="217" height="168" rx="14" fill="#FBE5DD" stroke="#E76F51" stroke-width="2"/>
+  </g>
+  <rect x="1112" y="458" width="80" height="21" rx="10" fill="#E76F51"/>
+  <text x="1152" y="473" text-anchor="middle" class="badge">OAAC STRONG</text>
+  <text x="1204" y="506" text-anchor="middle" class="boxTitle">Post-acquisition appearance</text>
+  <text x="1204" y="533" text-anchor="middle" class="body">1. gamma: ±0.25</text>
+  <text x="1204" y="555" text-anchor="middle" class="body">2. contrast: ±0.1875</text>
+  <text x="1204" y="577" text-anchor="middle" class="body">3. brightness/span: ±0.125</text>
+  <text x="1204" y="599" text-anchor="middle" class="small">U image only · p = 1.0</text>
+  <path d="M1019 504 L1093 504" class="flowOrange"/>
+  <text x="1055" y="489" text-anchor="middle" class="arrowLabel">Gη after A<tspan baseline-shift="sub" font-size="8">h</tspan></text>
+
+  <!-- Student and losses -->
+  <g filter="url(#shadow)">
+    <rect x="1113" y="151" width="242" height="254" rx="14" fill="#EEF0F5" stroke="#5E6C84" stroke-width="1.8"/>
+  </g>
+  <text x="1234" y="182" text-anchor="middle" class="boxTitle">Shared student 2D U-Net</text>
+  <text x="1234" y="206" text-anchor="middle" class="body">one 36-view forward</text>
+  <rect x="1135" y="226" width="198" height="43" rx="8" fill="#DCEAF7"/>
+  <text x="1234" y="252" text-anchor="middle" class="body">12 × native labeled centers</text>
+  <rect x="1135" y="280" width="198" height="43" rx="8" fill="#DDF2EC"/>
+  <text x="1234" y="306" text-anchor="middle" class="body">12 × re-acquired labeled</text>
+  <rect x="1135" y="334" width="198" height="48" rx="8" fill="#FBE5DD"/>
+  <text x="1234" y="354" text-anchor="middle" class="body">12 × re-acquired + OAAC</text>
+  <text x="1234" y="372" text-anchor="middle" class="small">unlabeled views</text>
+
+  <g filter="url(#shadow)">
+    <rect x="1381" y="151" width="164" height="460" rx="14" fill="#FFFFFF" stroke="#C7CFD9" stroke-width="1.6"/>
+  </g>
+  <text x="1463" y="181" text-anchor="middle" class="boxTitle">Training objective</text>
+  <rect x="1399" y="205" width="128" height="86" rx="9" fill="#EAF2F8"/>
+  <text x="1463" y="228" text-anchor="middle" class="body">Native L</text>
+  <text x="1463" y="250" text-anchor="middle" class="small">hard CE + Dice</text>
+  <text x="1463" y="274" text-anchor="middle" class="math">L<tspan baseline-shift="sub" font-size="9">hard</tspan></text>
+  <rect x="1399" y="306" width="128" height="86" rx="9" fill="#DDF2EC"/>
+  <text x="1463" y="329" text-anchor="middle" class="body">Re-acquired L</text>
+  <text x="1463" y="351" text-anchor="middle" class="small">soft CE + Dice</text>
+  <text x="1463" y="375" text-anchor="middle" class="math">L<tspan baseline-shift="sub" font-size="9">occ-L</tspan></text>
+  <rect x="1399" y="407" width="128" height="96" rx="9" fill="#FBE5DD"/>
+  <text x="1463" y="430" text-anchor="middle" class="body">OAAC U</text>
+  <text x="1463" y="452" text-anchor="middle" class="small">soft CE + Dice</text>
+  <text x="1463" y="476" text-anchor="middle" class="math">λ(t)L<tspan baseline-shift="sub" font-size="9">occ-U</tspan></text>
+  <path d="M1406 531 H1520" stroke="#C7CFD9"/>
+  <text x="1463" y="558" text-anchor="middle" class="math">L = ½(L<tspan baseline-shift="sub" font-size="9">hard</tspan><tspan font-style="normal"> + L</tspan><tspan baseline-shift="sub" font-size="9">occ-L</tspan><tspan font-style="normal">)</tspan></text>
+  <text x="1463" y="584" text-anchor="middle" class="math">+ λ(t)L<tspan baseline-shift="sub" font-size="9">occ-U</tspan></text>
+
+  <!-- arrows into student and objective -->
+  <path d="M1051 211 L1110 247" class="flowBlue"/>
+  <path d="M851 210 C965 210, 1028 280, 1110 301" class="flowTeal"/>
+  <path d="M1313 526 C1345 526, 1350 357, 1110 357" class="flowOrange"/>
+  <path d="M1355 247 L1378 247" class="flowBlue"/>
+  <path d="M1355 302 L1378 349" class="flowTeal"/>
+  <path d="M1355 358 L1378 454" class="flowOrange"/>
+  <path d="M851 334 C945 400, 1035 424, 1115 424 L1315 424 C1360 424, 1372 376, 1396 349" class="targetDash"/>
+  <text x="1033" y="413" text-anchor="middle" class="arrowLabel">q<tspan baseline-shift="sub" font-size="8">L</tspan> target</text>
+  <path d="M1019 661 C1185 690, 1345 665, 1396 492" class="targetDash"/>
+  <text x="1223" y="696" class="arrowLabel">q<tspan baseline-shift="sub" font-size="8">U</tspan> bypasses OAAC</text>
+
+  <!-- EMA update -->
+  <path d="M1180 405 C1105 727, 425 755, 351 605" class="dash"/>
+  <text x="742" y="739" text-anchor="middle" class="arrowLabel">EMA parameter update: ξ ← α ξ + (1−α) θ</text>
+
+  <!-- Inference region -->
+  <rect x="28" y="786" width="1544" height="108" rx="18" fill="#F4FAF6" stroke="#BFDCC9" stroke-width="1.5"/>
+  <rect x="28" y="786" width="9" height="108" rx="4" fill="#2A9D8F"/>
+  <text x="52" y="817" class="panel">INFERENCE</text>
+  <rect x="280" y="805" width="188" height="66" rx="10" fill="#FFFFFF" stroke="#91B5D5"/>
+  <text x="374" y="830" text-anchor="middle" class="boxTitle">Single native slice</text>
+  <text x="374" y="853" text-anchor="middle" class="math">x<tspan baseline-shift="sub" font-size="10">z</tspan></text>
+  <rect x="631" y="805" width="232" height="66" rx="10" fill="#EEF0F5" stroke="#5E6C84"/>
+  <text x="747" y="830" text-anchor="middle" class="boxTitle">Same student 2D U-Net</text>
+  <text x="747" y="853" text-anchor="middle" class="small">no architecture change</text>
+  <rect x="1028" y="805" width="200" height="66" rx="10" fill="#DDF2EC" stroke="#2A9D8F"/>
+  <text x="1128" y="830" text-anchor="middle" class="boxTitle">Segmentation mask</text>
+  <text x="1128" y="853" text-anchor="middle" class="math">ŷ<tspan baseline-shift="sub" font-size="10">z</tspan></text>
+  <path d="M468 838 L628 838" class="flowBlue"/>
+  <path d="M863 838 L1025 838" class="flowTeal"/>
+  <text x="1380" y="825" text-anchor="middle" class="boxTitle">No neighboring slices</text>
+  <text x="1380" y="847" text-anchor="middle" class="body">No A<tspan baseline-shift="sub" font-size="9">h</tspan> · No OAAC</text>
+  <text x="1380" y="867" text-anchor="middle" class="body">No extra parameters or latency</text>
+</svg>

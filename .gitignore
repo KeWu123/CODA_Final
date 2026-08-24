@@ -1,0 +1,41 @@
+__pycache__/
+*.py[cod]
+*.log
+log.txt
+training_log.txt
+*_log.txt
+performance.txt
+*performance*.txt
+.idea/
+.vscode/
+.pytest_cache/
+
+# PROMISE12 data and medical-image assets must remain local.
+data/
+datasets/
+PROMISE12/
+*.h5
+*.hdf5
+*.nii
+*.nii.gz
+*.nrrd
+
+# Training outputs.
+model/
+models/
+checkpoints/
+runs/
+logs/
+server_logs/
+paper_results/
+ablation_results/
+mpd_offline_audit/
+_audit_quick_validation/
+paper_figures/sliceeq_demo/
+*.pth
+*.pt
+*.ckpt
+events.out.tfevents.*
+
+# Temporary local copies/screenshots used only for paper-figure style review.
+research/literature/figure_references/

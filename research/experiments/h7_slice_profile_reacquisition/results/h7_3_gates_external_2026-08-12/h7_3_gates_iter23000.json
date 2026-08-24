@@ -1,0 +1,132 @@
+{
+  "decisions": {
+    "gate1_gradient_dilution": {
+      "observed": 0.6565133436270211,
+      "operator": "<",
+      "pass": false,
+      "threshold": 0.2
+    },
+    "gate2_frozen_student_proxy_fidelity": {
+      "observed": {
+        "outside_mass_fraction": 0.11208780104275082,
+        "per_sample_residual_mass_pearson": 0.9927658183907909,
+        "union_support_pixel_pearson": 0.34850841660020554
+      },
+      "pass": true,
+      "provisional_not_ema_teacher": true,
+      "thresholds": {
+        "maximum_outside_mass_fraction": 0.5,
+        "minimum_mass_pearson": 0.3,
+        "minimum_pixel_pearson": 0.3
+      }
+    },
+    "gate3_acquisition_specificity": {
+      "observed": 0.933901381213218,
+      "operator": "<",
+      "pass": true,
+      "threshold": 0.98
+    },
+    "joint_decision": "stop_h7_3"
+  },
+  "gate1_and_gate3_exact_gt_labeled": {
+    "active_gradient_samples": 128,
+    "batches": 16,
+    "ce_only_gradient_share": 0.5448928659430162,
+    "fractional_vs_binary_gradient_cosine_mean": 0.933901381213218,
+    "fractional_vs_binary_gradient_cosine_median": 0.9532302021980286,
+    "fractional_vs_binary_unit_gradient_l2_mean": 0.3134231717237981,
+    "full_ce_dice_gradient_share": 0.6565133436270211,
+    "residual_support_fraction": 0.008426686232002618,
+    "residual_support_mean_weight": 0.1967834561553939,
+    "residual_support_pixels": 105480,
+    "residual_support_weight_cv": 0.4520828798702601,
+    "samples": 191,
+    "total_pixels": 12517376
+  },
+  "gate1_and_gate3_unlabeled_proxy_descriptive": {
+    "active_gradient_samples": 120,
+    "batches": 16,
+    "ce_only_gradient_share": 0.49082015447500754,
+    "fractional_vs_binary_gradient_cosine_mean": 0.955263399084409,
+    "fractional_vs_binary_gradient_cosine_median": 0.9600943922996521,
+    "fractional_vs_binary_unit_gradient_l2_mean": 0.25220026724637135,
+    "full_ce_dice_gradient_share": 0.5077878849352531,
+    "residual_support_fraction": 0.0081330935160319,
+    "residual_support_mean_weight": 0.19733717344891236,
+    "residual_support_pixels": 102338,
+    "residual_support_weight_cv": 0.4615599424417625,
+    "samples": 192,
+    "total_pixels": 12582912
+  },
+  "gate2_frozen_student_proxy_fidelity": {
+    "exact_support_pixels": 105480,
+    "intersection_support_pixels": 90233,
+    "per_sample_residual_mass_pearson": 0.9927658183907909,
+    "proxy_residual_mass": 19600.724853515625,
+    "proxy_residual_mass_outside_exact": 2197.0021476745605,
+    "proxy_residual_mass_outside_exact_fraction": 0.11208780104275082,
+    "proxy_support_pixels": 101644,
+    "samples": 191,
+    "support_iou": 0.7719413812868399,
+    "support_precision": 0.8877356263035693,
+    "support_recall": 0.8554512703830109,
+    "union_support_pixel_pearson": 0.34850841660020554,
+    "union_support_pixels": 116891
+  },
+  "interpretation_warning": "The saved iteration-23000 checkpoint has no EMA state. Gate 2 uses the frozen student in eval mode and is provisional evidence, not a direct teacher measurement.",
+  "locked_definitions": {
+    "gate1_primary": "exact_gt_labeled_full_ce_dice_gradient_share",
+    "gate2_primary": "frozen_student_proxy_on_labeled_stacks",
+    "gate3_primary": "exact_gt_labeled_fractional_vs_binary_soft_ce",
+    "residual": "0.5 * L1(occupancy, center_one_hot)",
+    "support_epsilon": 1e-06
+  },
+  "neighbor_clamped_sample_fraction": {
+    "labeled": 0.07329842931937172,
+    "unlabeled": 0.06770833333333333
+  },
+  "provenance": {
+    "analysis_kind": "read_only_no_training",
+    "arguments": {
+      "batch_size": 12,
+      "checkpoint": "/home/aiteam/zhengtaoma/CoDA/model/SliceEqOcc_PROMISE12_7_labeled/self_train/unet/iter_23000_dice_0.8152.pth",
+      "device": "cuda",
+      "labeled_slices": 191,
+      "max_labeled_batches": 16,
+      "max_unlabeled_batches": 16,
+      "num_classes": 2,
+      "output_json": "../model/SliceEqOcc_PROMISE12_7_labeled/analysis/h7_3_gates_iter23000.json",
+      "patch_size": [
+        256,
+        256
+      ],
+      "root_path": "/home/aiteam/zhengtaoma/Baseline/data/PROMISE12_h5_training_source",
+      "seed": 1337,
+      "sliceeq_phase_max": 0.25,
+      "sliceeq_phase_min": -0.25,
+      "sliceeq_radius": 1,
+      "sliceeq_sigma_max": 0.85,
+      "sliceeq_sigma_min": 0.45
+    },
+    "checkpoint_contains_ema_teacher": false,
+    "checkpoint_format": "plain_state_dict",
+    "created_utc": "2026-08-12T00:45:09.641550+00:00",
+    "cuda_version": "12.8",
+    "dataset_length": 940,
+    "device": "cuda",
+    "file_sha256": {
+      "/home/aiteam/zhengtaoma/Baseline/data/PROMISE12_h5_training_source/train_slices.list": "bc7fda5b2543dac5b647b6efb434593b46c85e4300aa8f6b30da4731ef9fd585",
+      "/home/aiteam/zhengtaoma/CoDA/code/analyze_sliceeq_gates.py": "cf031624ca86d1d2078ac50b71a8e3fdfd77cccbc1ace4399e81bee03e6e3d35",
+      "/home/aiteam/zhengtaoma/CoDA/code/dataloaders/sliceeq_dataset.py": "9cc39cd6ed373e22ec854340c7975868025c2bf74223370c1eeb69e928fc19d5",
+      "/home/aiteam/zhengtaoma/CoDA/code/train_sliceeq_occ.py": "f9391d1979eba4b87ec5fc6368bbc376201bcf66e83feb1106ef36efb0ec93e5",
+      "/home/aiteam/zhengtaoma/CoDA/code/utils/sliceeq.py": "44a956a92eccdbb2109034a05ac5ec72f190b33f740ad95c1ed8b505bae168f7",
+      "/home/aiteam/zhengtaoma/CoDA/code/utils/sliceeq_gates.py": "7646963d8628d77de8ef17e95c1d8863ab8083896be191b3583bcbbbc4b78283",
+      "/home/aiteam/zhengtaoma/CoDA/code/utils/sliceeq_occ.py": "de2fc77c40de4d543e6aa682589aaae652887de9429742d08feacc97e50d6080",
+      "/home/aiteam/zhengtaoma/CoDA/model/SliceEqOcc_PROMISE12_7_labeled/self_train/unet/iter_23000_dice_0.8152.pth": "3f3515e6411d8a50877ba6b660c82fcb9752eab524172315a3e8f8b7845c8052",
+      "/home/aiteam/zhengtaoma/CoDA/research/experiments/h7_slice_profile_reacquisition/h7_3_gate_protocol.md": "07682f651ccdd2f728b04df960ec373ecc828e519ec1f833840d42d5ef91f4ba"
+    },
+    "gate2_evidence_source": "frozen_student_proxy_in_eval_mode",
+    "torch_version": "2.11.0+cu128"
+  },
+  "schema_version": 1
+}
