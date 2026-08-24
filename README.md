@@ -7,11 +7,20 @@ re-acquisition figures, train-only MPD audit, strict tests and automatic result
 tables, use `run_coda_final_paper_suite.sh`. The complete cross-machine guide is
 in [docs/CODA_FINAL_RUNBOOK.md](docs/CODA_FINAL_RUNBOOK.md).
 
-## Current SliceEqOcc-OAAC method
+The complete paper framing is **SliceEq-AC: Acquisition-Aligned
+Semi-Supervised MRI Segmentation with Fractional Occupancy**. Its method
+derivation, unified objective, parameter provenance, claim-aligned ablations
+and paper table plan are documented in
+[docs/SLICEEQ_AC_COMPLETE_PAPER_METHOD_ZH.md](docs/SLICEEQ_AC_COMPLETE_PAPER_METHOD_ZH.md).
 
-The current selected line is **SliceEqOcc-OAAC**: paired through-plane
-re-acquisition with fractional occupancy, followed by a monotonic
-coordinate-preserving appearance perturbation on unlabeled student views.
+## Current SliceEq-AC method
+
+The selected implementation line is **SliceEqOcc-OAAC-Strong-MPD**: paired
+through-plane re-acquisition with fractional occupancy, followed by a monotonic
+coordinate-preserving appearance perturbation on unlabeled student views and a
+train-only, frozen moment-constrained profile distribution. These operations
+are one acquisition-aligned training formulation; they are not changes to the
+2D U-Net inference architecture.
 
 - [Detailed method principles, literature provenance, contributions, results,
   limitations, and CVPR paper plan](docs/SLICEEQ_OCC_OAAC_MODEL_AND_PAPER_GUIDE.md)

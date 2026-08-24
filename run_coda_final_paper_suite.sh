@@ -45,8 +45,8 @@ stage_label() {
     occ_l_only) echo "F10 AFO-L-only" ;;
     occ_u_only) echo "F01 AFO-U-only" ;;
     full) echo "C3 SliceEqOcc" ;;
-    oaac_strong) echo "C4 SliceEqOcc+OAAC-S1.25" ;;
-    mpd) echo "C5 SliceEqOcc+OAAC-S1.25+MPD" ;;
+    oaac_strong) echo "C4 SliceEq-AC (SRA+AFO+OAAC)" ;;
+    mpd) echo "C5 SliceEq-AC+MPD (final)" ;;
   esac
 }
 
@@ -94,6 +94,7 @@ run_contract_tests() {
     python -m unittest discover -s tests -p 'test_sliceeq_mpd_contract.py' -v
     python -m unittest discover -s tests -p 'test_sliceeq_mpd_audit.py' -v
     python -m unittest discover -s tests -p 'test_sliceeq_portable_entries.py' -v
+    python -m unittest discover -s tests -p 'test_sliceeq_paper_method_contract.py' -v
   )
 }
 

@@ -9,12 +9,17 @@
 | B0 | MT-24 | 历史 24-view EMA scaffold 参照 |
 | C0 | ViewMatch-36 | 仅增加一个普通标注视图，控制 batch、计算量和 BN 组成 |
 | C1 | SRA-Image-36 | 混合三层图像但仍使用中心层 target，检查单纯图像增强 |
-| C2 | SRA-Hard-36 | 图像和 target 同步变换，但 occupancy 立即硬化 |
+| C2 | SRA-Hard-36 | 图像和 target 使用同一 profile，但 occupancy 立即硬化 |
 | F10 | AFO-L-only | 只在标注分支保留 fractional occupancy |
 | F01 | AFO-U-only | 只在未标注分支保留 fractional occupancy |
 | C3 | SliceEqOcc | 两个分支均使用配对 fractional occupancy |
 | C4 | SliceEqOcc + OAAC-S1.25 | 在 C3 上加入坐标保持的强度外观扰动 |
-| C5 | SliceEqOcc + OAAC-S1.25 + MPD | 最终方法：训练集约束优化得到全局 profile 分布 |
+| C5 | SliceEq-AC + MPD | 最终方法：训练集约束优化得到全局 profile 分布 |
+
+这些阶段不是互不相关的模块堆叠。SRA 定义采集算子，AFO 定义该算子下
+的监督目标，OAAC 只覆盖采集后的坐标保持外观变化，MPD 只设计 SRA 的
+profile 抽样分布。完整公式、参数来源和论文实验逻辑见
+`docs/SLICEEQ_AC_COMPLETE_PAPER_METHOD_ZH.md`。
 
 脚本还会运行：
 
