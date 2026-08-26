@@ -5,6 +5,7 @@ ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 DATA_ROOT="${DATA_ROOT:-${ROOT}/data/PROMISE12_h5}"
 PRETRAINED_CHECKPOINT="${PRETRAINED_CHECKPOINT:-}"
 GPU="${GPU:-0}"
+APPEARANCE_MODE="${APPEARANCE_MODE:-none}"
 DETACH="${DETACH:-1}"
 ALLOW_EXISTING="${ALLOW_EXISTING:-0}"
 PIPELINE_WORKER="${PIPELINE_WORKER:-0}"
@@ -29,7 +30,7 @@ validate_inputs() {
   }
   for stage in "${STAGE_LIST[@]}"; do
     case "${stage}" in
-      baseline|baseline_36|image_only|image_only_36|aligned_occ|hard_targets|occ_l_only|occ_u_only|full) ;;
+      baseline|baseline_36|image_only|image_only_36|aligned_occ|paired_lu_24|hard_targets|occ_l_only|occ_u_only|full) ;;
       *) echo "Unsupported ablation stage: ${stage}" >&2; exit 2 ;;
     esac
   done
@@ -55,6 +56,10 @@ validate_inputs() {
   case "${ALLOW_EXISTING}" in
     0|1) ;;
     *) echo "ALLOW_EXISTING must be 0 or 1." >&2; exit 2 ;;
+  esac
+  case "${APPEARANCE_MODE}" in
+    none|oaac_strong) ;;
+    *) echo "APPEARANCE_MODE must be none or oaac_strong." >&2; exit 2 ;;
   esac
 
   if [[ "${ALLOW_EXISTING}" != "1" ]]; then
@@ -84,6 +89,7 @@ run_pipeline() {
     DATA_ROOT="${DATA_ROOT}" \
     PRETRAINED_CHECKPOINT="${PRETRAINED_CHECKPOINT}" \
     OCC_ABLATION="${stage}" EXP_NAME="${exp}" GPU="${GPU}" \
+    APPEARANCE_MODE="${APPEARANCE_MODE}" \
     DETACH=0 RUN_TAG="${RUN_TAG}" \
       bash "${ROOT}/run_sliceeq_occ_ablation.sh"
 
@@ -129,6 +135,7 @@ if [[ "${DETACH}" == "1" && "${PIPELINE_WORKER}" != "1" ]]; then
     DATA_ROOT="${DATA_ROOT}" \
     PRETRAINED_CHECKPOINT="${PRETRAINED_CHECKPOINT}" \
     GPU="${GPU}" DETACH=0 ALLOW_EXISTING="${ALLOW_EXISTING}" \
+    APPEARANCE_MODE="${APPEARANCE_MODE}" \
     PIPELINE_WORKER=1 PIPELINE_NAME="${PIPELINE_NAME}" STAGES="${STAGES}" \
     RUN_TAG="${RUN_TAG}" \
     bash "${ROOT}/run_sliceeq_occ_ablation_pipeline.sh" \

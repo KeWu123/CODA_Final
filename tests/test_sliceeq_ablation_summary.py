@@ -9,7 +9,7 @@ CODE_ROOT = Path(__file__).resolve().parents[1] / 'code'
 sys.path.insert(0, str(CODE_ROOT))
 
 from summarize_sliceeq_ablation import (  # noqa: E402
-    collect, write_csv, write_markdown)
+    PAPER_MPD_ROWS, collect, write_csv, write_markdown)
 
 
 class SliceEqAblationSummaryTest(unittest.TestCase):
@@ -25,6 +25,7 @@ class SliceEqAblationSummaryTest(unittest.TestCase):
                 'iteration 400 : mean_dice : 0.750000, best_dice : 0.750000\n',
                 encoding='utf-8')
             (snapshot / 'performance.txt').write_text(
+                'Model path: /tmp/unet_best_model.pth\n'
                 'Case00 -> Dice: 0.1, Jaccard: 0.1, HD95: 1, ASD: 1\n'
                 'Average metric:\nDice: 0.810000\nJaccard: 0.700000\n'
                 'HD95: 3.000000\nASD: 1.500000\n', encoding='utf-8')
@@ -34,6 +35,8 @@ class SliceEqAblationSummaryTest(unittest.TestCase):
             self.assertEqual(record['Val-selected Iter'], '400')
             self.assertEqual(record['Val Dice'], '0.750000')
             self.assertEqual(record['Test Dice'], '0.810000')
+            self.assertEqual(record['Test Checkpoint'],
+                             'unet_best_model.pth')
             self.assertEqual(record['Status'], 'complete')
 
             csv_path = root / 'results.csv'
@@ -46,6 +49,28 @@ class SliceEqAblationSummaryTest(unittest.TestCase):
             self.assertTrue(any(
                 item['ID'] == 'C5' and 'MPD' in item['Method']
                 for item in records))
+
+    def test_paper_preset_rejects_test_selected_checkpoint(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            snapshot = root / (
+                'SliceEqOccOAACStrongMPD_PROMISE12_7_labeled/'
+                'self_train/unet')
+            snapshot.mkdir(parents=True)
+            (snapshot / 'log.txt').write_text(
+                'iteration 25800 : mean_dice : 0.836008, '
+                'best_dice : 0.836008\n', encoding='utf-8')
+            (snapshot / 'performance.txt').write_text(
+                'Model path: /tmp/iter_29000.pth\nAverage metric:\n'
+                'Dice: 0.854573\nJaccard: 0.749330\n'
+                'HD95: 3.256519\nASD: 1.324697\n', encoding='utf-8')
+
+            records = collect(root, PAPER_MPD_ROWS)
+            self.assertEqual([row['ID'] for row in records],
+                             ['A0', 'A1', 'A2', 'A3', 'A4', 'A5'])
+            a5 = records[-1]
+            self.assertEqual(a5['Test Checkpoint'], 'iter_29000.pth')
+            self.assertEqual(a5['Status'], 'selector-mismatch')
 
 
 if __name__ == '__main__':

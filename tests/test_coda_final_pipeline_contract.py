@@ -42,6 +42,28 @@ class CODAFinalPipelineContractTest(unittest.TestCase):
         self.assertIn('summarize_sliceeq_ablation.py', source)
         self.assertIn('SKIP_COMPLETED', source)
 
+    def test_current_paper_ablation_is_matched_and_selector_safe(self):
+        source = PIPELINE.read_text(encoding='utf-8')
+        for stage in ('paper_a0', 'paper_a1', 'paper_a2', 'paper_a3',
+                      'paper_a4', 'paper_a5'):
+            self.assertIn(stage, source)
+        self.assertIn('--appearance_mode oaac_strong', source)
+        self.assertIn('paper_a0) echo "baseline"', source)
+        self.assertIn('paper_a1) echo "image_only"', source)
+        self.assertIn('paper_a2) echo "aligned_occ"', source)
+        self.assertIn('paper_a3) echo "paired_lu_24"', source)
+        self.assertIn(
+            'paper_a4) echo "SliceEqOccOAACStrong_PROMISE12"', source)
+        self.assertIn(
+            'paper_a5) echo "SliceEqOccOAACStrongMPD_PROMISE12"', source)
+        self.assertIn('performance_is_validation_best', source)
+        self.assertIn('checkpoint_is_lfs_pointer', source)
+        self.assertIn('git lfs install && git lfs pull', source)
+        self.assertIn('performance_before_validation_retest_${RUN_TAG}.txt',
+                      source)
+        self.assertIn('unet_best_model\\.pth', source)
+        self.assertIn('--preset "${SUMMARY_PRESET}"', source)
+
 
 if __name__ == '__main__':
     unittest.main()

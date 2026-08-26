@@ -17,6 +17,8 @@ RUN_FIGURES="${RUN_FIGURES:-1}"
 RUN_AUDIT="${RUN_AUDIT:-1}"
 RUN_TESTS="${RUN_TESTS:-1}"
 STAGES="${STAGES:-baseline baseline_36 image_only_36 hard_targets occ_l_only occ_u_only full oaac_strong mpd}"
+SUMMARY_PRESET="${SUMMARY_PRESET:-full}"
+RESULT_BASENAME="${RESULT_BASENAME:-coda_final_paper_results}"
 RUN_TAG="${RUN_TAG:-$(date +%Y%m%d_%H%M%S)}"
 LOG_DIR="${ROOT}/server_logs"
 RESULT_DIR="${ROOT}/paper_results"
@@ -30,6 +32,12 @@ experiment_name() {
   case "$1" in
     baseline|baseline_36|image_only_36|hard_targets|occ_l_only|occ_u_only|full)
       echo "SliceEqOccIncremental_$1_35_5_10_Pre10000_Self30000_label7_seed1337" ;;
+    paper_a0) echo "SlicePairViewBudget_A0_35_5_10_Pre10000_Self30000_label7_seed1337" ;;
+    paper_a1) echo "SlicePairViewBudget_A1_35_5_10_Pre10000_Self30000_label7_seed1337" ;;
+    paper_a2) echo "SlicePairViewBudget_A2_35_5_10_Pre10000_Self30000_label7_seed1337" ;;
+    paper_a3) echo "SliceEqOccIncremental_paired_lu_24_35_5_10_Pre10000_Self30000_label7_seed1337" ;;
+    paper_a4) echo "SliceEqOccOAACStrong_PROMISE12" ;;
+    paper_a5) echo "SliceEqOccOAACStrongMPD_PROMISE12" ;;
     oaac_strong) echo "SliceEqOccOAACStrong_PROMISE12" ;;
     mpd) echo "SliceEqOccOAACStrongMPD_PROMISE12" ;;
     *) echo "Unsupported stage: $1" >&2; return 2 ;;
@@ -47,7 +55,36 @@ stage_label() {
     full) echo "C3 SliceEqOcc" ;;
     oaac_strong) echo "C4 SliceEq-AC (SRA+AFO+OAAC)" ;;
     mpd) echo "C5 SliceEq-AC+MPD (final)" ;;
+    paper_a0) echo "A0 appearance-matched teacher-student-24" ;;
+    paper_a1) echo "A1 image profile + center hard target-24" ;;
+    paper_a2) echo "A2 paired-U uniform-24" ;;
+    paper_a3) echo "A3 paired-L/U replacement-24" ;;
+    paper_a4) echo "A4 paired-L/U additional view-36" ;;
+    paper_a5) echo "A5 SlicePair MPD-36" ;;
   esac
+}
+
+paper_occ_ablation() {
+  case "$1" in
+    paper_a0) echo "baseline" ;;
+    paper_a1) echo "image_only" ;;
+    paper_a2) echo "aligned_occ" ;;
+    paper_a3) echo "paired_lu_24" ;;
+    *) echo "No paper ablation mapping for $1" >&2; return 2 ;;
+  esac
+}
+
+performance_is_validation_best() {
+  local performance="$1"
+  [[ -s "${performance}" ]] &&
+    grep -Eq '^Model path: .*unet_best_model\.pth[[:space:]]*$' "${performance}"
+}
+
+checkpoint_is_lfs_pointer() {
+  local checkpoint="$1"
+  [[ -f "${checkpoint}" ]] &&
+    head -c 64 "${checkpoint}" | grep -Fq \
+      'version https://git-lfs.github.com/spec/v1'
 }
 
 nonempty_lines() {
@@ -58,6 +95,10 @@ validate_inputs() {
   [[ ${#STAGE_LIST[@]} -gt 0 ]] || { echo "STAGES is empty" >&2; exit 2; }
   local stage
   for stage in "${STAGE_LIST[@]}"; do experiment_name "${stage}" >/dev/null; done
+  case "${SUMMARY_PRESET}" in
+    full|paper_mpd) ;;
+    *) echo "Unsupported SUMMARY_PRESET: ${SUMMARY_PRESET}" >&2; exit 2 ;;
+  esac
   for pair in "train.list:35" "val.list:5" "test.list:10" "train_slices.list:940"; do
     local file="${pair%%:*}" expected="${pair##*:}" actual
     [[ -f "${DATA_ROOT}/${file}" ]] || { echo "Missing ${DATA_ROOT}/${file}" >&2; exit 2; }
@@ -126,7 +167,20 @@ train_stage() {
           --max_iterations 30000 --batch_size 24 --labeled_bs 12 \
           --labelnum 7 --seed 1337
       ) ;;
-    oaac_strong)
+    paper_a0|paper_a1|paper_a2|paper_a3)
+      local occ_ablation
+      occ_ablation="$(paper_occ_ablation "${stage}")"
+      (
+        cd "${ROOT}/code"
+        CUDA_VISIBLE_DEVICES="${GPU}" python -u train_sliceeq_occ_ablation.py \
+          --root_path "${DATA_ROOT}" \
+          --pretrained_checkpoint "${PRETRAINED_CHECKPOINT}" \
+          --exp "${exp}" --occ_ablation "${occ_ablation}" \
+          --appearance_mode oaac_strong \
+          --max_iterations 30000 --batch_size 24 --labeled_bs 12 \
+          --labelnum 7 --seed 1337
+      ) ;;
+    oaac_strong|paper_a4)
       (
         cd "${ROOT}/code"
         CUDA_VISIBLE_DEVICES="${GPU}" python -u \
@@ -136,7 +190,7 @@ train_stage() {
           --exp "${exp}" --max_iterations 30000 --batch_size 24 \
           --labeled_bs 12 --labelnum 7 --seed 1337
       ) ;;
-    mpd)
+    mpd|paper_a5)
       (
         cd "${ROOT}/code"
         CUDA_VISIBLE_DEVICES="${GPU}" python -u \
@@ -152,8 +206,8 @@ train_stage() {
 test_stage() {
   local stage="$1" exp="$2" checkpoint="$3" log_file="$4" entry
   case "${stage}" in
-    oaac_strong) entry="test_sliceeq_occ_oaac_strong.py" ;;
-    mpd) entry="test_sliceeq_occ_oaac_strong_mpd.py" ;;
+    oaac_strong|paper_a4) entry="test_sliceeq_occ_oaac_strong.py" ;;
+    mpd|paper_a5) entry="test_sliceeq_occ_oaac_strong_mpd.py" ;;
     *) entry="test_sliceeq_occ.py" ;;
   esac
   echo "[$(date '+%F %T')] Testing validation-selected ${checkpoint}"
@@ -172,7 +226,8 @@ summarize_results() {
     cd "${ROOT}/code"
     python summarize_sliceeq_ablation.py \
       --model_root "${ROOT}/model" \
-      --output_prefix "${RESULT_DIR}/coda_final_paper_results"
+      --preset "${SUMMARY_PRESET}" \
+      --output_prefix "${RESULT_DIR}/${RESULT_BASENAME}"
   )
 }
 
@@ -185,9 +240,21 @@ run_stages() {
     performance="${snapshot}/performance.txt"
     stage_log="${LOG_DIR}/test_${stage}_${RUN_TAG}.log"
 
-    if [[ "${SKIP_COMPLETED}" == "1" && -s "${performance}" ]]; then
+    if checkpoint_is_lfs_pointer "${checkpoint}"; then
+      echo "Checkpoint is an unresolved Git LFS pointer: ${checkpoint}" >&2
+      echo "Run 'git lfs install && git lfs pull', or remove the pointer-only experiment directory before retraining." >&2
+      exit 2
+    fi
+    if [[ "${SKIP_COMPLETED}" == "1" ]] && \
+        performance_is_validation_best "${performance}"; then
       echo "[$(date '+%F %T')] Skip completed $(stage_label "${stage}"): ${performance}"
       continue
+    fi
+    if [[ -s "${performance}" ]]; then
+      echo "[$(date '+%F %T')] Existing result is not validation-best; retesting ${checkpoint}"
+      cp -p "${performance}" \
+        "${snapshot}/performance_before_validation_retest_${RUN_TAG}.txt"
+      echo "Archived prior report before validation-best retest."
     fi
     if [[ ! -f "${checkpoint}" ]]; then
       if [[ -d "${snapshot}" && "${ALLOW_EXISTING}" != "1" ]]; then
@@ -217,7 +284,7 @@ run_pipeline() {
   run_stages
   summarize_results
   echo "[$(date '+%F %T')] CODA Final paper suite completed"
-  echo "Results: ${RESULT_DIR}/coda_final_paper_results.md"
+  echo "Results: ${RESULT_DIR}/${RESULT_BASENAME}.md"
   echo "Figures: ${FIGURE_DIR}"
   echo "Audit:   ${AUDIT_DIR}/audit_summary.md"
 }
@@ -230,6 +297,7 @@ if [[ "${DETACH}" == "1" && "${PIPELINE_WORKER}" != "1" ]]; then
     DETACH=0 PIPELINE_WORKER=1 ALLOW_EXISTING="${ALLOW_EXISTING}" \
     SKIP_COMPLETED="${SKIP_COMPLETED}" RUN_FIGURES="${RUN_FIGURES}" \
     RUN_AUDIT="${RUN_AUDIT}" RUN_TESTS="${RUN_TESTS}" STAGES="${STAGES}" \
+    SUMMARY_PRESET="${SUMMARY_PRESET}" RESULT_BASENAME="${RESULT_BASENAME}" \
     RUN_TAG="${RUN_TAG}" bash "${ROOT}/run_coda_final_paper_suite.sh" \
       >"${PIPELINE_LOG}" 2>&1 </dev/null &
   echo "Started CODA Final paper suite: PID=$!"

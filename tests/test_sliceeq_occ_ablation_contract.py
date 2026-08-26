@@ -10,6 +10,7 @@ M0_M1_PIPELINE = ROOT / 'run_sliceeq_occ_m0_m1_pipeline.sh'
 M2_M3_PIPELINE = ROOT / 'run_sliceeq_occ_m2_m3_pipeline.sh'
 PAPER_PIPELINE = ROOT / 'run_sliceeq_occ_paper_ablation_pipeline.sh'
 FACTORIAL_PIPELINE = ROOT / 'run_sliceeq_occ_factorial_pipeline.sh'
+PAIRED_LU_24_PIPELINE = ROOT / 'run_slicepair_paired_lu_24_pipeline.sh'
 DOC = ROOT / 'docs' / 'SLICEEQ_OCC_ABLATIONS.md'
 
 
@@ -18,6 +19,13 @@ class SliceEqOccAblationContractTest(unittest.TestCase):
         tree = ast.parse(TRAIN.read_text(encoding='utf-8'))
         source = TRAIN.read_text(encoding='utf-8')
         self.assertIn("choices=['baseline', 'baseline_36', 'image_only',", source)
+        self.assertIn("choices=['none', 'oaac_strong']", source)
+        self.assertIn(
+            'ordered_appearance_transform(\n'
+            '                                unlabeled_reacquired_images,',
+            source)
+        self.assertIn('appearance_generator.manual_seed(APPEARANCE_SEED)',
+                      source)
         self.assertIn("components['labeled_target_mode'] == 'hard'", source)
         self.assertIn("components['unlabeled_target_mode'] == 'center'", source)
         self.assertIn("not components['use_labeled_reacq']", source)
@@ -54,6 +62,35 @@ class SliceEqOccAblationContractTest(unittest.TestCase):
             components['full']['unlabeled_target_mode'], 'fractional')
         self.assertEqual(
             components['no_labeled_reacq'], components['aligned_occ'])
+
+    def test_paired_lu_24_preserves_centers_and_expected_labeled_risk(self):
+        namespace = {}
+        tree = ast.parse(TRAIN.read_text(encoding='utf-8'))
+        assignment = next(
+            node for node in tree.body
+            if isinstance(node, ast.Assign)
+            and any(isinstance(target, ast.Name)
+                    and target.id == 'ABLATION_COMPONENTS'
+                    for target in node.targets))
+        exec(compile(ast.Module(body=[assignment], type_ignores=[]),
+                     str(TRAIN), 'exec'), namespace)
+        components = namespace['ABLATION_COMPONENTS']['paired_lu_24']
+        source = TRAIN.read_text(encoding='utf-8')
+
+        self.assertTrue(components['replace_labeled_half'])
+        self.assertTrue(components['use_labeled_reacq'])
+        self.assertTrue(components['reacquire_labeled_image'])
+        self.assertTrue(components['reacquire_unlabeled_image'])
+        self.assertTrue(components['teacher_uses_neighbors'])
+        self.assertEqual(components['labeled_target_mode'], 'fractional')
+        self.assertEqual(components['unlabeled_target_mode'], 'fractional')
+        self.assertIn('labeled_assignment_generator', source)
+        self.assertIn('torch.randperm(', source)
+        self.assertIn('paired_count = flags.labeled_bs // 2', source)
+        self.assertIn('native_labeled_indices = labeled_permutation[', source)
+        self.assertIn("if components['replace_labeled_half']:", source)
+        self.assertIn('paired_lu_24 must create exactly {} student', source)
+        self.assertIn('supervised_loss = 0.5 * (', source)
 
     def test_paper_chain_is_compute_and_view_matched(self):
         namespace = {}
@@ -110,8 +147,9 @@ class SliceEqOccAblationContractTest(unittest.TestCase):
         self.assertIn('OCC_ABLATION="${OCC_ABLATION:-image_only}"', source)
         self.assertIn('SliceEqOccIncremental_${OCC_ABLATION}', source)
         self.assertIn(
-            'baseline|baseline_36|image_only|image_only_36|aligned_occ|hard_targets|occ_l_only|occ_u_only|full|no_labeled_reacq',
+            'baseline|baseline_36|image_only|image_only_36|aligned_occ|paired_lu_24|hard_targets|occ_l_only|occ_u_only|full|no_labeled_reacq',
             source)
+        self.assertIn('--appearance_mode "${APPEARANCE_MODE}"', source)
         self.assertIn('--labelnum 7', source)
         self.assertIn('--max_iterations 30000', source)
         self.assertIn('*7_labeled*|*label7*|*7label*', source)
@@ -140,12 +178,23 @@ class SliceEqOccAblationContractTest(unittest.TestCase):
         self.assertIn('STAGES="aligned_occ full"', m2_m3)
         self.assertIn('PIPELINE_NAME="m2_m3"', m2_m3)
 
+    def test_paired_lu_24_wrapper_locks_paper_a3(self):
+        source = PAIRED_LU_24_PIPELINE.read_text(encoding='utf-8')
+        self.assertIn('STAGES="paired_lu_24"', source)
+        self.assertIn('PIPELINE_NAME="slicepair_paired_lu_24"', source)
+        self.assertIn('APPEARANCE_MODE="oaac_strong"', source)
+        self.assertIn('run_sliceeq_occ_ablation_pipeline.sh', source)
+
     def test_paper_and_factorial_wrappers_lock_stage_order(self):
         paper = PAPER_PIPELINE.read_text(encoding='utf-8')
         factorial = FACTORIAL_PIPELINE.read_text(encoding='utf-8')
         self.assertIn(
-            'STAGES="baseline_36 image_only_36 hard_targets full"', paper)
-        self.assertIn('PIPELINE_NAME="paper_main"', paper)
+            'STAGES:-paper_a0 paper_a1 paper_a2 paper_a3 paper_a4 paper_a5',
+            paper)
+        self.assertIn('SUMMARY_PRESET:-paper_mpd', paper)
+        self.assertIn('run_coda_final_paper_suite.sh', paper)
+        self.assertIn(
+            'hard_targets remains a supplementary mechanism control', paper)
         self.assertIn('STAGES="occ_l_only occ_u_only"', factorial)
         self.assertIn('PIPELINE_NAME="factorial_lu"', factorial)
 

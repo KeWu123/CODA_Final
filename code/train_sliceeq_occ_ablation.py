@@ -2,7 +2,9 @@
 
 After the inherited 1k identity warmup, the main chain adds one component at a
 time: image-only re-acquisition, aligned fractional occupancy, then an exact-GT
-re-acquired labeled anchor. ``hard_targets`` remains a mechanism control.
+re-acquired labeled anchor. ``paired_lu_24`` estimates the full labeled risk
+with six native and six paired labeled views while retaining 12 paired
+unlabeled views. ``hard_targets`` remains a mechanism control.
 """
 
 import argparse
@@ -29,6 +31,7 @@ from utils.sliceeq import (
     sample_slice_profiles)
 from utils.sliceeq_occ import (
     occupancy_diagnostics, soft_segmentation_loss)
+from utils.sliceeq_oaac_strong import ordered_appearance_transform
 
 
 DEFAULT_PRETRAINED_CHECKPOINT = (
@@ -87,10 +90,18 @@ parser.add_argument('--sliceeq_phase_max', type=float, default=0.25,
 parser.add_argument(
     '--occ_ablation', type=str, default='full',
     choices=['baseline', 'baseline_36', 'image_only', 'image_only_36',
-             'aligned_occ', 'hard_targets', 'occ_l_only', 'occ_u_only',
-             'full', 'no_labeled_reacq'],
+             'aligned_occ', 'paired_lu_24', 'hard_targets', 'occ_l_only',
+             'occ_u_only', 'full', 'no_labeled_reacq'],
     help='controlled SliceEqOcc ablation branch')
+parser.add_argument(
+    '--appearance_mode', type=str, default='none',
+    choices=['none', 'oaac_strong'],
+    help='fixed post-acquisition appearance policy for matched ablations')
 args = parser.parse_args()
+
+
+APPEARANCE_SEED = 1339
+LABELED_ASSIGNMENT_SEED_OFFSET = 3
 
 
 ABLATION_COMPONENTS = {
@@ -149,6 +160,19 @@ ABLATION_COMPONENTS = {
         'use_labeled_reacq': False,
         'reacquire_labeled_image': False,
     },
+    # View-budget control: all 12 labeled centers appear exactly once, with a
+    # random six receiving native hard supervision and the complementary six
+    # receiving paired fractional supervision. The 12 unlabeled centers retain
+    # paired fractional supervision, yielding 6 + 6 + 12 = 24 student views.
+    'paired_lu_24': {
+        'labeled_target_mode': 'fractional',
+        'unlabeled_target_mode': 'fractional',
+        'reacquire_unlabeled_image': True,
+        'teacher_uses_neighbors': True,
+        'use_labeled_reacq': True,
+        'reacquire_labeled_image': True,
+        'replace_labeled_half': True,
+    },
     # Additional mechanism control, not a stage in the incremental chain.
     'hard_targets': {
         'labeled_target_mode': 'hard',
@@ -193,6 +217,7 @@ ABLATION_DISPLAY_NAMES = {
     'image_only_36': 'C1 / SRA-Image-36',
     'aligned_occ': 'Legacy / AFO-U-24',
     'no_labeled_reacq': 'Legacy / AFO-U-24',
+    'paired_lu_24': 'A3 / Paired-LU-24',
     'hard_targets': 'C2 / SRA-Hard-36',
     'occ_l_only': 'F10 / AFO-L-only',
     'occ_u_only': 'F01 / AFO-U-only',
@@ -202,7 +227,9 @@ ABLATION_DISPLAY_NAMES = {
 
 def _ablation_components(name):
     """Return a copy so the locked experiment definition cannot be mutated."""
-    return dict(ABLATION_COMPONENTS[name])
+    components = dict(ABLATION_COMPONENTS[name])
+    components.setdefault('replace_labeled_half', False)
+    return components
 
 
 def _import_locked_training_base():
@@ -245,6 +272,8 @@ def _validate_args(flags):
         raise ValueError(
             'SliceEqOcc ablations require the locked loader batch_size=24 '
             'and labeled_bs=12')
+    if flags.occ_ablation == 'paired_lu_24' and flags.labeled_bs % 2:
+        raise ValueError('paired_lu_24 requires an even labeled_bs')
 
 
 def _one_hot(labels, num_classes, dtype):
@@ -324,10 +353,22 @@ def self_train(flags, pretrained_checkpoint, snapshot_path):
     logging.info(
         'SliceEqOcc ablation: %s (%s)', flags.occ_ablation,
         ABLATION_DISPLAY_NAMES[flags.occ_ablation])
+    logging.info(
+        'SliceEqOcc appearance mode: %s%s', flags.appearance_mode,
+        ' (unlabeled post-acquisition only, seed={})'.format(
+            APPEARANCE_SEED)
+        if flags.appearance_mode == 'oaac_strong' else '')
     if flags.occ_ablation == 'baseline':
         logging.info(
             'SliceEqOcc effective student batch after warmup: 24 '
             '(12 original-L + 12 original-U)')
+    elif components['replace_labeled_half']:
+        half_labeled = flags.labeled_bs // 2
+        logging.info(
+            'SliceEqOcc effective student batch after warmup: %d '
+            '(%d original-L + %d reacquired-L + %d reacquired-U)',
+            batch_size, half_labeled, half_labeled,
+            batch_size - flags.labeled_bs)
     elif not components['use_labeled_reacq']:
         logging.info(
             'SliceEqOcc effective student batch after warmup: 24 '
@@ -339,13 +380,14 @@ def self_train(flags, pretrained_checkpoint, snapshot_path):
     logging.info(
         'SliceEqOcc components: target_mode(L/U)=%s/%s, '
         'reacquire_image(L/U)=%s/%s, teacher_uses_neighbors=%s, '
-        'use_labeled_reacq=%s',
+        'use_labeled_reacq=%s, replace_labeled_half=%s',
         components['labeled_target_mode'],
         components['unlabeled_target_mode'],
         components['reacquire_labeled_image'],
         components['reacquire_unlabeled_image'],
         components['teacher_uses_neighbors'],
-        components['use_labeled_reacq'])
+        components['use_labeled_reacq'],
+        components['replace_labeled_half'])
     if components['use_labeled_reacq']:
         logging.info(
             'SliceEqOcc objective: Lsup=0.5*(L_original_hard + '
@@ -355,8 +397,10 @@ def self_train(flags, pretrained_checkpoint, snapshot_path):
             'SliceEqOcc objective: Lsup=L_original_hard; '
             'total=Lsup+lambda*L_unlabeled')
     logging.info(
-        'SliceEqOcc profile RNG seeds: unlabeled=%d, labeled=%d',
-        flags.seed, flags.seed + 1)
+        'SliceEqOcc RNG seeds: unlabeled_profile=%d, labeled_profile=%d, '
+        'labeled_assignment=%d',
+        flags.seed, flags.seed + 1,
+        flags.seed + LABELED_ASSIGNMENT_SEED_OFFSET)
 
     # Keep the unlabeled profile stream independent from the added labeled
     # view, so adding exact-GT supervision does not consume its random draws.
@@ -364,6 +408,13 @@ def self_train(flags, pretrained_checkpoint, snapshot_path):
     unlabeled_profile_generator.manual_seed(flags.seed)
     labeled_profile_generator = torch.Generator(device='cuda')
     labeled_profile_generator.manual_seed(flags.seed + 1)
+    labeled_assignment_generator = torch.Generator()
+    labeled_assignment_generator.manual_seed(
+        flags.seed + LABELED_ASSIGNMENT_SEED_OFFSET)
+    appearance_generator = None
+    if flags.appearance_mode == 'oaac_strong':
+        appearance_generator = torch.Generator(device='cuda')
+        appearance_generator.manual_seed(APPEARANCE_SEED)
     offsets = tuple(range(
         -flags.sliceeq_radius, flags.sliceeq_radius + 1))
     model.train()
@@ -448,6 +499,8 @@ def self_train(flags, pretrained_checkpoint, snapshot_path):
                     'unlabeled_center_foreground_fraction': (
                         center_pseudo > 0).float().mean(),
                 }
+                preview_image = volume_batch[1, 0:1]
+                preview_label = label_batch[1].unsqueeze(0)
             else:
                 with torch.no_grad():
                     unlabeled_count, stack_size, channels, height, width = \
@@ -492,11 +545,35 @@ def self_train(flags, pretrained_checkpoint, snapshot_path):
                             unlabeled_hard_target, num_classes,
                             volume_batch.dtype)
 
+                    native_labeled_indices = None
+                    if components['replace_labeled_half']:
+                        labeled_permutation = torch.randperm(
+                            flags.labeled_bs,
+                            generator=labeled_assignment_generator)
+                        paired_count = flags.labeled_bs // 2
+                        paired_labeled_indices = labeled_permutation[
+                            :paired_count].to(device=volume_batch.device)
+                        native_labeled_indices = labeled_permutation[
+                            paired_count:].to(device=volume_batch.device)
+                        labeled_reacq_stack = labeled_stack.index_select(
+                            0, paired_labeled_indices)
+                        labeled_reacq_target_stack = \
+                            labeled_target_stack.index_select(
+                                0, paired_labeled_indices)
+                    else:
+                        paired_labeled_indices = None
+                        paired_count = flags.labeled_bs
+                        labeled_reacq_stack = labeled_stack
+                        labeled_reacq_target_stack = labeled_target_stack
+
+                    labeled_reacq_center_target = \
+                        labeled_reacq_target_stack[:, center]
+
                     if components['use_labeled_reacq'] and \
                             components['reacquire_labeled_image']:
                         labeled_weights, labeled_sigma, labeled_phase = \
                             sample_slice_profiles(
-                                flags.labeled_bs, offsets,
+                                paired_count, offsets,
                                 (flags.sliceeq_sigma_min,
                                  flags.sliceeq_sigma_max),
                                 (flags.sliceeq_phase_min,
@@ -505,7 +582,8 @@ def self_train(flags, pretrained_checkpoint, snapshot_path):
                                 generator=labeled_profile_generator)
                         labeled_reacquired_images, labeled_hard_target, \
                             labeled_occupancy = paired_slice_reacquisition(
-                                labeled_stack, labeled_target_stack,
+                                labeled_reacq_stack,
+                                labeled_reacq_target_stack,
                                 labeled_weights, num_classes)
                     else:
                         labeled_weights, labeled_sigma, labeled_phase = \
@@ -523,7 +601,8 @@ def self_train(flags, pretrained_checkpoint, snapshot_path):
                             volume_batch.dtype)
                     elif components['labeled_target_mode'] == 'center':
                         labeled_occupancy = _one_hot(
-                            labeled_labels, num_classes, volume_batch.dtype)
+                            labeled_reacq_center_target, num_classes,
+                            volume_batch.dtype)
 
                     if components['unlabeled_target_mode'] == 'hard':
                         unlabeled_occupancy = _one_hot(
@@ -534,8 +613,16 @@ def self_train(flags, pretrained_checkpoint, snapshot_path):
                             pseudo_stack[:, center], num_classes,
                             volume_batch.dtype)
 
+                    if appearance_generator is not None:
+                        unlabeled_reacquired_images, appearance_diagnostics = \
+                            ordered_appearance_transform(
+                                unlabeled_reacquired_images,
+                                generator=appearance_generator)
+                    else:
+                        appearance_diagnostics = {}
+
                     labeled_profile_diagnostics = reacquisition_diagnostics(
-                        labeled_stack, labeled_target_stack,
+                        labeled_reacq_stack, labeled_reacq_target_stack,
                         labeled_reacquired_images, labeled_hard_target,
                         labeled_weights, labeled_sigma, labeled_phase)
                     unlabeled_profile_diagnostics = reacquisition_diagnostics(
@@ -548,21 +635,47 @@ def self_train(flags, pretrained_checkpoint, snapshot_path):
                     diagnostics.update(_prefixed(
                         'labeled_', occupancy_diagnostics(
                             labeled_occupancy,
-                            labeled_target_stack[:, center])))
+                            labeled_reacq_center_target)))
                     diagnostics.update(_prefixed(
                         'unlabeled_', unlabeled_profile_diagnostics))
                     diagnostics.update(_prefixed(
                         'unlabeled_', occupancy_diagnostics(
                             unlabeled_occupancy,
                             pseudo_stack[:, center])))
+                    diagnostics.update(appearance_diagnostics)
 
-                if not components['use_labeled_reacq']:
+                if components['replace_labeled_half']:
+                    native_labeled_images = labeled_images.index_select(
+                        0, native_labeled_indices)
+                    native_labeled_labels = labeled_labels.index_select(
+                        0, native_labeled_indices)
+                    student_batch = torch.cat(
+                        (native_labeled_images, labeled_reacquired_images,
+                         unlabeled_reacquired_images), dim=0)
+                    outputs = _logits(model(student_batch))
+                    native_count = native_labeled_images.shape[0]
+                    paired_count = labeled_reacquired_images.shape[0]
+                    original_outputs = outputs[:native_count]
+                    reacquired_labeled_outputs = outputs[
+                        native_count:native_count + paired_count]
+                    unlabeled_outputs = outputs[
+                        native_count + paired_count:]
+                    original_target_labels = native_labeled_labels
+                    reacquired_target_occupancy = labeled_occupancy
+                    if student_batch.shape[0] != batch_size:
+                        raise RuntimeError(
+                            'paired_lu_24 must create exactly {} student '
+                            'views, got {}'.format(
+                                batch_size, student_batch.shape[0]))
+                elif not components['use_labeled_reacq']:
                     student_batch = torch.cat(
                         (labeled_images, unlabeled_reacquired_images), dim=0)
                     outputs = _logits(model(student_batch))
                     original_outputs = outputs[:flags.labeled_bs]
                     reacquired_labeled_outputs = None
                     unlabeled_outputs = outputs[flags.labeled_bs:]
+                    original_target_labels = labeled_labels
+                    reacquired_target_occupancy = None
                 else:
                     student_batch = torch.cat(
                         (labeled_images, labeled_reacquired_images,
@@ -572,10 +685,15 @@ def self_train(flags, pretrained_checkpoint, snapshot_path):
                     reacquired_labeled_outputs = outputs[
                         flags.labeled_bs:2 * flags.labeled_bs]
                     unlabeled_outputs = outputs[2 * flags.labeled_bs:]
+                    original_target_labels = labeled_labels
+                    reacquired_target_occupancy = labeled_occupancy
+
+                preview_image = student_batch[1, 0:1]
+                preview_label = original_target_labels[1].unsqueeze(0)
 
                 original_supervised_loss, original_ce, original_dice = \
                     _hard_segmentation_losses(
-                        original_outputs, labeled_labels,
+                        original_outputs, original_target_labels,
                         ce_loss, dice_loss)
                 if reacquired_labeled_outputs is None:
                     reacquired_labeled_loss = volume_batch.new_tensor(0.0)
@@ -585,7 +703,8 @@ def self_train(flags, pretrained_checkpoint, snapshot_path):
                 else:
                     reacquired_labeled_loss, reacquired_labeled_ce, \
                         reacquired_labeled_dice = soft_segmentation_loss(
-                            reacquired_labeled_outputs, labeled_occupancy)
+                            reacquired_labeled_outputs,
+                            reacquired_target_occupancy)
                     supervised_loss = 0.5 * (
                         original_supervised_loss + reacquired_labeled_loss)
                 consistency_loss, consistency_ce, consistency_dice = \
@@ -641,14 +760,14 @@ def self_train(flags, pretrained_checkpoint, snapshot_path):
 
             if iter_num % 20 == 0:
                 writer.add_image(
-                    'train/Image', volume_batch[1, 0:1], iter_num)
+                    'train/Image', preview_image, iter_num)
                 outputs_img = torch.argmax(
                     torch.softmax(outputs, dim=1), dim=1, keepdim=True)
                 writer.add_image(
                     'train/Prediction', outputs_img[1] * 50, iter_num)
                 writer.add_image(
                     'train/GroundTruth',
-                    label_batch[1].unsqueeze(0) * 50, iter_num)
+                    preview_label * 50, iter_num)
                 writer.add_image(
                     'sliceeq_occ/ReacquiredLabeled',
                     labeled_reacquired_images[0], iter_num)
