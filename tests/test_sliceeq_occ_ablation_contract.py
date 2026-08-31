@@ -35,6 +35,14 @@ class SliceEqOccAblationContractTest(unittest.TestCase):
         self.assertIn('unlabeled_reacquired_images = unlabeled_images', source)
         self.assertIsNotNone(tree)
 
+    def test_dataset_preflight_uses_the_repository_signature(self):
+        source = TRAIN.read_text(encoding='utf-8')
+        self.assertIn(
+            'validate_promise12_root(\n'
+            '        args.root_path, strict_split=True, check_hdf5=True)',
+            source)
+        self.assertNotIn('labelnum=args.labelnum', source)
+
     def test_incremental_chain_adds_exactly_one_component(self):
         namespace = {}
         tree = ast.parse(TRAIN.read_text(encoding='utf-8'))

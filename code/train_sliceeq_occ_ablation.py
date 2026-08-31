@@ -879,8 +879,7 @@ if __name__ == '__main__':
     pretrained_checkpoint = locked._resolve_pretrained_checkpoint(
         args.pretrained_checkpoint)
     dataset_report = validate_promise12_root(
-        args.root_path, strict_split=True, check_hdf5=True,
-        labelnum=args.labelnum)
+        args.root_path, strict_split=True, check_hdf5=True)
     print('PROMISE12 preflight: {}'.format(dataset_report))
 
     if not args.deterministic:
